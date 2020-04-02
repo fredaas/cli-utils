@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+
+import secrets
+import string
+import argparse
+
+DEFAULT_LENGHT = 16
+DEFAULT_SYMBOLS = string.ascii_letters + string.digits + string.punctuation
+
+valid_symbols = {
+    "ascii_lower": string.ascii_lowercase,
+    "ascii_upper": string.ascii_uppercase,
+    "ascii": string.ascii_letters,
+    "digits": string.digits,
+    "punctuation": string.punctuation
+}
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-l",
+        "--length",
+        type = int,
+        required = False
+    )
+
+    parser.add_argument(
+        "-s",
+        "--symbols",
+        type = str,
+        required = False
+    )
+
+    argv = vars(parser.parse_args())
+
+    if argv["length"] is None:
+        length = DEFAULT_LENGHT
+    else:
+        length = argv["length"]
+
+    symbols = ""
+
+    if argv["symbols"] is None:
+        symbols = DEFAULT_SYMBOLS
+    else:
+        for key in argv["symbols"].split(","):
+            if key in valid_symbols.keys():
+                symbols += valid_symbols[key]
+            else:
+                print("[ERROR] Invalid punctuation class")
+                quit(1)
+
+    for i in range(10):
+        token = "".join(secrets.choice(symbols) for x in range(length))
+        print(token)

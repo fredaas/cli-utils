@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+#
+# SYNTAX
+#
+#     pargv
+#
+# DESCRIPTION
+#
+#     Formats output from stdout into a single string of space-separated words.
+#
+# EXAMPLE
+#
+#     $ ls *.c | pargv
+#
+#     a.c b.c c.c
+#
+
+import sys
+import re
+import subprocess
+
+if __name__ == "__main__":
+
+    stdin = sys.stdin.read().rstrip()
+
+    if len(stdin) == 0:
+        print("[ERROR] No input")
+        quit(1)
+
+    stdin = stdin.replace('\n', ' ').replace('\r', '')
+    stdin = stdin.strip()
+    stdin = re.sub('( )+', ' ', stdin)
+
+    print(stdin)

@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+#
+# SYNTAX
+#
+#     ptable <symbol>
+#
+# OPTIONS
+#
+#     symbol
+#
+#         Quoted alignment symbol.
+#
+# DESCRIPTION
+#
+#     Aligns multiple columns of text separated by an alignment symbol.
+#
+#     Reads from stdin and writes to stout.
+#
+# EXAMPLE
+#
+#     $ cat << EOF | palign "&"
+#     > a & aa & aaa
+#     > & aa & a
+#     > aa & aaa & aaa
+#     > a & & a
+#     > EOF
+#
+#     a  & aa  & aaa
+#        & aa  & a
+#     aa & aaa & aaa
+#     a  &     & a
+#
+
+import sys
+
+token = None
+max_size = None
+
+if __name__ == "__main__":
+    argv = sys.argv[1:]
+
+    if len(argv) == 0:
+        print("[ERROR] No alignment symbol provided")
+        quit(1)
+
+    token = argv[0]
+    stdin = sys.stdin.read().rstrip().split("\n")
+    matrix = [ x.split(token) for x in stdin ]
+    matrix = list(map(lambda x: [ y.strip() for y in x ], matrix))
+
+    num_cols = len(matrix[0])
+
+    max_size = [ None for x in range(num_cols) ]
+
+    for c in range(num_cols):
+        max_size[c] = len(max(matrix, key=lambda r: len(r[c]))[c])
+
+    for row in matrix:
+        for j, col in enumerate(row):
+            alpha = max_size[j] - len(col)
+            beta = 1
+            if j != 0:
+                print(token + " " * beta + col.strip() + " " * (alpha + beta), end="")
+            else:
+                print(col.strip() + " " * (alpha + beta), end="")
+        print()

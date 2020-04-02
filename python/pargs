@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+#
+# SYNTAX
+#
+#     pargs <program> <cuts>
+#
+# DESCRIPTION
+#
+#     Reads from stdout and calls 'program' with the arguments provided by
+#     'cuts'.
+#
+# EXAMPLE
+#
+#    $ echo "foo bar bas" | pargs echo :2 :1 :2
+#
+#    bar foo bar
+#
+
+import sys
+import subprocess
+
+if __name__ == "__main__":
+    stdin = sys.stdin.read().rstrip()
+    argv = sys.argv[1:]
+
+    if len(stdin) == 0:
+        print("[ERROR] No input")
+        quit(1)
+
+    if len(argv) == 0:
+        print("[ERROR] Missing arguments")
+        quit(1)
+
+    stdin = stdin.split("\n")
+
+    pos = [ int(x[1:]) for x in argv[1:] ]
+
+    for line in stdin:
+        line = line.split()
+        try:
+            subprocess.call(
+                argv[0] + " " + " ".join(line[x] for x in pos), shell = True)
+        except:
+            print("[ERROR] Failed to execute command: {}".format(command))

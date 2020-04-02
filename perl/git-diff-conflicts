@@ -1,0 +1,20 @@
+#!/usr/bin/env perl
+
+#
+# git-diff-conflicts
+#
+# DESCRIPTION
+#
+#     Prints conflicting files.
+#
+
+use warnings;
+use strict;
+
+if (!`git rev-parse --is-inside-work-tree 2>/dev/null`)
+{
+    print("[ERROR] Not inside a git environment\n");
+    exit 1;
+}
+
+print(`git diff-tree --name-only --diff-filter=U HEAD`);

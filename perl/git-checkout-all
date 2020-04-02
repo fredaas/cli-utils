@@ -1,0 +1,41 @@
+#!/usr/bin/env perl
+
+#
+# git-checkout-all
+#
+# DESCRIPTION
+#
+#     Performs a checkout on all branches in refs/remotes
+#
+
+use warnings;
+use strict;
+
+if (!`git rev-parse --is-inside-work-tree 2>/dev/null`)
+{
+    print("[ERROR] Not inside a git environment\n");
+    exit 1;
+}
+
+my @remotes = sort split(/\n/,
+    `git for-each-ref --format="%(refname:short)" refs/remotes`);
+
+@remotes = map { $_ =~ s/^origin\///r } @remotes;
+
+my $basebranch = `git rev-parse --abbrev-ref HEAD`;
+
+$basebranch =~ s/\n//;
+
+for my $branch (@remotes)
+{
+    if (system("git checkout $branch >/dev/null 2>&1") == 0)
+    {
+        print("Performed: git checkout $branch\n");
+    }
+    else
+    {
+        print("[ERROR] Failed to checkout $branch\n");
+    }
+}
+
+system("git checkout $basebranch >/dev/null 2>&1");

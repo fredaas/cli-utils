@@ -1,0 +1,56 @@
+#!/usr/bin/env perl
+
+#
+# git-diff-branches <basebranch>
+#
+# DESCRIPTION
+#
+#     Prints the number of commits behind/ahead 'basebranch' for all branches in
+#     refs/heads.
+#
+
+use warnings;
+use strict;
+
+use List::Util qw(reduce);
+
+if (!`git rev-parse --is-inside-work-tree 2>/dev/null`)
+{
+    print("[ERROR] Not inside a git environment\n");
+    exit 1;
+}
+
+my $argc = scalar @ARGV;
+
+if ($argc != 1)
+{
+    print("[ERROR] Expected 1 argument, $argc given\n");
+    exit 1;
+}
+
+my @branches = sort split(/\n/,
+    `git for-each-ref --format="%(refname:short)" refs/heads`);
+
+my $basebranch = $ARGV[0];
+
+if ($basebranch ne "HEAD")
+{
+    if (!grep(/^$basebranch$/, @branches))
+    {
+        print("[ERROR] Invalid base branch\n");
+        exit 1;
+    }
+}
+
+my $max_length = length(reduce { length($a) > length($b) ? $a : $b } @branches);
+
+foreach my $branch (@branches)
+{
+    my @diff = split(/\n/,
+        `git rev-list --no-merges --left-right --oneline $basebranch...$branch`);
+
+    my $count_behind = scalar grep(/^</, @diff);
+    my $count_ahead  = scalar grep(/^>/, @diff);
+
+    printf("%-${max_length}s %4s | %s\n", $branch, $count_behind, $count_ahead);
+}
