@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+src=$(basename -- "$1")
+dst=${src%.*}
+pdftoppm $src $dst -png -singlefile -r 300

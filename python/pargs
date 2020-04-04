@@ -2,43 +2,44 @@
 #
 # SYNTAX
 #
-#     pargs <program> <cuts>
+#     pargs <program>
 #
 # DESCRIPTION
 #
-#     Reads from stdout and calls 'program' with the arguments provided by
-#     'cuts'.
+#     Calls program with the arguments provided by stdin.
 #
 # EXAMPLE
 #
-#    $ echo "foo bar bas" | pargs echo :2 :1 :2
+#     $ echo "foo bar bas" | tr ' ' '\n' |  pargs echo
 #
-#    bar foo bar
+#     foo
+#     bar
+#     bas
 #
 
 import sys
 import subprocess
 
 if __name__ == "__main__":
-    stdin = sys.stdin.read().rstrip()
+    stdin = sys.stdin.read().lstrip().split("\n")
+
     argv = sys.argv[1:]
 
     if len(stdin) == 0:
-        print("[ERROR] No input")
+        print("[ERROR] No input detected")
         quit(1)
 
     if len(argv) == 0:
         print("[ERROR] Missing arguments")
         quit(1)
 
-    stdin = stdin.split("\n")
+    # Prune empty strings
+    stdin = [ x for x in stdin if len(x) > 0 ]
 
-    pos = [ int(x[1:]) for x in argv[1:] ]
+    program = argv[0]
 
-    for line in stdin:
-        line = line.split()
+    for arg in stdin:
         try:
-            subprocess.call(
-                argv[0] + " " + " ".join(line[x] for x in pos), shell = True)
+            subprocess.call("{} {}".format(program, arg), shell=True)
         except:
             print("[ERROR] Failed to execute command: {}".format(command))

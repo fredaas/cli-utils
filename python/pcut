@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+#
+# SYNTAX
+#
+#     pargs <program>
+#
+# DESCRIPTION
+#
+#     Cuts columns from stout and print them to stdout.
+#
+# EXAMPLE
+#
+#     $ echo "foo bar bas" | pcut :1 :3 :3 :2
+#
+#     foo
+#     bas
+#     bas
+#     bar
+#
+
+import sys
+import subprocess
+import argparse
+
+OPTION_DELIMITER = " "
+
+def init_argparse():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-d",
+        "--delimiter",
+        type = str,
+        required = False
+    )
+
+    parser.add_argument(
+        "indices",
+        nargs = "+"
+    )
+
+    return vars(parser.parse_args())
+
+if __name__ == "__main__":
+    stdin = sys.stdin.read().lstrip().split("\n")
+
+    if len(stdin) == 0:
+        print("[ERROR] No input detected")
+        quit(1)
+
+    argv = init_argparse()
+
+    indices = argv["indices"]
+
+    if argv.get("delimiter"):
+        OPTION_DELIMITER = argv["delimiter"]
+
+    # Prune empty strings
+    stdin = [ x for x in stdin if len(x) > 0 ]
+
+    # Prune index annotation
+    indices = [ int(x[1:]) for x in indices ]
+
+    for n, line in enumerate(stdin):
+        line = line.strip().split(OPTION_DELIMITER)
+        for i in indices:
+            try:
+                print(line[i - 1], end=" ")
+            except:
+                print("\n[ERROR] Failed to cut index {} on line {}"
+                    .format(i, n))
+        print()
