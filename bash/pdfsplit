@@ -2,4 +2,4 @@
 
 file=$(basename -- "$1")
 outname=${file%.*}
-pdftoppm $file $outname -png -singlefile -r 300
+qpdf --split-pages $file "${outname}_%d.pdf"
