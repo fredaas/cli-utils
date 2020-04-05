@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#
+# DESCRIPTION
+#
+#     Yanks current directory to clipboard.
+#
+
+echo -n "$(pwd)" | xclip -selection clipboard

@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+#
+# pdfsplit <file>
+#
+# DESCRIPTION
+#
+#     Splits each page in 'file' into a separate pdf file.
+#
 
 file=$(basename -- "$1")
 outname=${file%.*}

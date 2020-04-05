@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+#
+# pdf2png-all <file>
+#
+# DESCRIPTION
+#
+#     Converts all pages in 'file' to pngs with the same name.
+#
 
 file=$(basename -- "$1")
 outname=${file%.*}
