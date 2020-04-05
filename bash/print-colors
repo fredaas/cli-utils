@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+#
+# DESCRIPTION
+#
+#     Prints 8-bit and 4-bit colors to stdout.
+#
+# NOTE
+#
+#     Color codes must be escaped when decorating the terminal, i.e. \[\e[0m\],
+#     to not to occupy column space in the terminal.
+#
+# FORMATS
+#
+#     0 Clear all formatting
+#     1 Bold and bright
+#     2 Dim
+#     4 Underlined
+#     5 Blink
+#     7 Invert foreground and background
+#     8 Hidden
+#
+# 4-BIT COLORS
+#
+#     Foreground codes: \e[format;<30-37, 90-97>
+#
+#     Background codes: \e[format;<40-47, 100-107>
+#
+# 8-BIT COLORS
+#
+#     Foreground codes: \e[format;38;5;<0-255>
+#
+#     Background codes: \e[format;48;5;<0-255>
+#
+# EXAMPLE: ATTRIBUTE COMBINATION
+#
+#     Blinking black text on white background:
+#
+#         $ echo -e "\e[5;30;107mText\e[0m"
+#
+#         $ echo -e "\e[5;38;5;0;48;5;255mText\e\e[0m"
+#
+
+printf "8-BIT COLORS\n\n"
+
+for i in {0..15}; do
+    printf "\e[48;5;%sm%5s\e[0m" $i $i
+    (( (i + 1) % 8 == 0 )) && printf "\n"
+done
+printf "\n"
+for i in {16..255..6}; do
+    for j in {0..5}; do
+        k=$(( i + j ))
+        printf "\e[48;5;%sm%5s\e[0m" $k $k
+    done
+    printf "\n"
+done
+printf "\n"
+
+printf "4-BIT COLORS\n\n"
+
+for i in {30..37}; do
+    printf "\e[0;%sm%5s\e[0m" $i $i
+done
+printf "\n"
+for i in {90..97}; do
+    printf "\e[0;%sm%5s\e[0m" $i $i
+done
+printf "\n";
+for i in {40..47}; do
+    printf "\e[0;%sm%5s\e[0m" $i $i
+done
+printf "\n"
+for i in {100..107}; do
+    printf "\e[0;%sm%5s\e[0m" $i $i
+done
+printf "\n"

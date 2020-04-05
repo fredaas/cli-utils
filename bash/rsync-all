@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+# rsync-all <dir> <host>
+#
+# DESCRIPTION
+#
+#     Copies all files (including dotfiles) to host.
+#
+# NOTE
+#
+#     Trailing slash on 'dir' copies the contents of the directory, while no
+#     trailing slash copies the directory itself.
+#
+
+rsync -azvPI "$1" "$2"
