@@ -63,6 +63,7 @@ if __name__ == "__main__":
 
     for n, line in enumerate(stdin):
         line = line.strip().split(OPTION_DELIMITER)
+        line = [ x for x in line if len(x) > 0 ]
         for i in indices:
             try:
                 print(line[i - 1], end=" ")
