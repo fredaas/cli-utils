@@ -43,10 +43,13 @@ if ($basebranch ne "HEAD")
     }
 }
 
-if (!grep(/^$branch$/, @branches))
+if ($branch ne "HEAD")
 {
-    print("[ERROR] Invalid target branch\n");
-    exit 1;
+    if (!grep(/^$branch$/, @branches))
+    {
+        print("[ERROR] Invalid target branch\n");
+        exit 1;
+    }
 }
 
 my @diff_behind = split(/\n/,
@@ -57,14 +60,14 @@ my @diff_ahead = split(/\n/,
     `git rev-list --no-merges --right-only --oneline $basebranch...$branch`);
 my $count_ahead  = scalar @diff_ahead;
 
-print("$branch behind\n");
+print("$branch | behind\n");
 foreach my $row (@diff_behind)
 {
     print("    $row\n");
 }
 print("$count_behind\n");
 
-print("$branch ahead\n");
+print("$branch | ahead\n");
 foreach my $row (@diff_ahead)
 {
     print("    $row\n");

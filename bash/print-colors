@@ -37,7 +37,7 @@
 #
 #         $ echo -e "\e[5;30;107mText\e[0m"
 #
-#         $ echo -e "\e[5;38;5;0;48;5;255mText\e\e[0m"
+#         $ echo -e "\e[5;38;5;0;48;5;255mText\e[0m"
 #
 
 printf "8-BIT COLORS\n\n"

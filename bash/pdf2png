@@ -4,9 +4,9 @@
 #
 # DESCRIPTION
 #
-#     Converts the first page in 'file' to png with the same name.
+#     Converts all pages in 'file' to pngs with the same name.
 #
 
 file=$(basename -- "$1")
 outname=${file%.*}
-pdftoppm $file $outname -png -singlefile -r 300
+pdftoppm $file $outname -png -r 300

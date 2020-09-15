@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#
+# pdfrange <file> <range>
+#
+# DESCRIPTION
+#
+#     Splits each page in 'file' into a separate pdf file.
+#
+
+file=$(basename -- "$1")
+range=$2
+outname=${file%.*}
+qpdf $file --pages $file $range -- "out_${outname}.pdf"
