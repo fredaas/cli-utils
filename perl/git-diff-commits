@@ -11,8 +11,6 @@
 use warnings;
 use strict;
 
-use List::Util qw(reduce);
-
 if (!`git rev-parse --is-inside-work-tree 2>/dev/null`)
 {
     print("[ERROR] Not inside a git environment\n");
@@ -23,12 +21,12 @@ my $argc = scalar @ARGV;
 
 if ($argc != 2)
 {
-    print("[ERROR] Expected 2 argument, $argc given\n");
+    print("[ERROR] Expected 2 arguments, $argc given\n");
     exit 1;
 }
 
-my @branches = sort split(/\n/,
-    `git for-each-ref --format="%(refname:short)" refs/heads`);
+my @branches = split(/\n/,
+        `git for-each-ref --format="%(refname:short)" refs`);
 
 my $basebranch = $ARGV[0];
 
