@@ -1,7 +1,15 @@
 #!/usr/bin/env perl
 
 #
-# git-diff-branches <basebranch>
+# git-diff-branches <basebranch> [-r|-a]
+#
+# OPTIONS
+#
+#     -r
+#         Compares 'basebranch' with refs/remotes.
+#
+#     -a
+#         Compares 'basebranch' with refs.
 #
 # DESCRIPTION
 #
@@ -22,14 +30,56 @@ if (!`git rev-parse --is-inside-work-tree 2>/dev/null`)
 
 my $argc = scalar @ARGV;
 
-if ($argc != 1)
+if ($argc < 1)
 {
-    print("[ERROR] Expected 1 argument, $argc given\n");
+    print("[ERROR] Expected at least 1 argument, $argc given\n");
     exit 1;
 }
 
-my @branches = sort split(/\n/,
-    `git for-each-ref --format="%(refname:short)" refs/heads`);
+my $option_heads = 0;
+my $option_remotes = 0;
+my $option_refs = 0;
+
+if ($argc == 1)
+{
+    $option_heads = 1;
+}
+elsif ($argc == 2)
+{
+    my $arg = $ARGV[1];
+
+    if ($arg eq "-r")
+    {
+        $option_remotes = 1;
+    }
+    elsif ($arg eq "-a")
+    {
+        $option_refs = 1;
+    }
+    else
+    {
+        print("[ERROR] Invalid option\n");
+        exit 1;
+    }
+}
+
+my @branches;
+
+if ($option_heads)
+{
+    @branches = sort split(/\n/,
+        `git for-each-ref --format="%(refname:short)" refs/heads`);
+}
+elsif ($option_remotes)
+{
+    @branches = sort split(/\n/,
+        `git for-each-ref --format="%(refname:short)" refs/remotes`);
+}
+else
+{
+    @branches = sort split(/\n/,
+        `git for-each-ref --format="%(refname:short)" refs`);
+}
 
 my $basebranch = $ARGV[0];
 
