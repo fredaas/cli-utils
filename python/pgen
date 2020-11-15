@@ -3,7 +3,9 @@
 import secrets
 import string
 import argparse
+import re
 
+DEFAULT_ITERATIONS = 1
 DEFAULT_LENGHT = 16
 DEFAULT_SYMBOLS = string.ascii_letters + string.digits + string.punctuation
 
@@ -15,42 +17,104 @@ valid_symbols = {
     "punctuation": string.punctuation
 }
 
+# Returns a string of unique tokens from 's' with whitespaces removed
+def get_tokens(s):
+    s = re.sub('( )+', '', s)
+    return "".join(list(set([ x for x in s])))
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
+    # Password length
     parser.add_argument(
-        "-l",
-        "--length",
+        "-s",
+        dest = "size",
+        type = int,
+        required = False,
+        help = "password length"
+    )
+
+    # Number of passwords to generate
+    parser.add_argument(
+        "-i",
+        dest = "iterations",
         type = int,
         required = False
     )
 
+    # Special tokens
     parser.add_argument(
-        "-s",
-        "--symbols",
+        "-t",
+        dest = "tokens",
+        nargs = "+",
         type = str,
-        required = False
+        required = False,
+    )
+
+    # Lower-case letters
+    parser.add_argument(
+        "-l",
+        dest = "lower",
+        action = "store_true"
+    )
+
+    # Upper-case letters
+    parser.add_argument(
+        "-u",
+        dest = "upper",
+        action = "store_true"
+    )
+
+    # Letters
+    parser.add_argument(
+        "-a",
+        dest = "letters",
+        action = "store_true"
+    )
+
+    # Digits
+    parser.add_argument(
+        "-d",
+        dest = "digits",
+        action = "store_true"
     )
 
     argv = vars(parser.parse_args())
 
-    if argv["length"] is None:
-        length = DEFAULT_LENGHT
+    length = DEFAULT_LENGHT
+
+    if argv["size"]:
+        length = argv["size"]
+
+    has_ascii_lower = argv["lower"]
+    has_ascii_upper = argv["upper"]
+    has_ascii = argv["letters"]
+    has_digits = argv["digits"]
+    has_tokens = argv["tokens"] is not None
+
+    s = ""
+
+    if not has_ascii_lower and not has_ascii_upper and not has_ascii \
+        and not has_digits and not has_tokens:
+        s = DEFAULT_SYMBOLS
     else:
-        length = argv["length"]
+        if has_digits:
+            s += string.digits
+        if has_ascii:
+            s += string.ascii_letters
+        else:
+            if has_ascii_lower:
+                s += string.ascii_lowercase
+            if has_ascii_upper:
+                s += string.ascii_uppercase
+        if has_tokens:
+            s += get_tokens(argv["tokens"][0])
 
-    symbols = ""
+    iterations = DEFAULT_ITERATIONS
 
-    if argv["symbols"] is None:
-        symbols = DEFAULT_SYMBOLS
-    else:
-        for key in argv["symbols"].split(","):
-            if key in valid_symbols.keys():
-                symbols += valid_symbols[key]
-            else:
-                print("[ERROR] Invalid punctuation class")
-                quit(1)
+    if argv["iterations"]:
+        iterations = argv["iterations"]
 
-    for i in range(10):
-        token = "".join(secrets.choice(symbols) for x in range(length))
+    for i in range(iterations):
+        token = "".join(secrets.choice(s) for x in range(length))
         print(token)
