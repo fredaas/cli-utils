@@ -7,4 +7,4 @@
 #     Appends 'key' to .ssh/authorized_keys in 'host'.
 #
 
-cat "$1" | ssh "$2" "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+cat "$1" | ssh "$2" "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 700 -R ~/.ssh"
