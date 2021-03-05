@@ -9,4 +9,4 @@
 
 file=$(basename -- "$1")
 outname=${file%.*}
-pdftoppm $file $outname -png -r 300
+pdftoppm $file $outname -png -r 1000
