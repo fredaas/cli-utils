@@ -23,8 +23,8 @@ else
 }
 
 my %items;
-
 my $total = 0;
+
 foreach my $file (@files)
 {
     my $size = `wc -l < $file`;
