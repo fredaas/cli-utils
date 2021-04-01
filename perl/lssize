@@ -22,13 +22,20 @@ else
     @files = grep(-f $_, glob("*"));
 }
 
+my %items;
+
 my $total = 0;
 foreach my $file (@files)
 {
     my $size = `wc -l < $file`;
     chomp $size;
     $total += $size;
-    printf("%6s %s\n", $size, $file);
+    $items{$file} = $size;
+}
+
+foreach my $key (sort { $items{$a} <=> $items{$b} } keys %items)
+{
+    printf("%6s %s\n", $items{$key}, $key);
 }
 
 printf("Total: %s\n", $total);
