@@ -1,0 +1,34 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+
+my $argc = scalar @ARGV;
+
+if ($argc > 1)
+{
+    printf("[ERROR] Expected 1 argument, $argc given\n");
+    exit 1;
+}
+
+my @files;
+
+if ($argc == 1)
+{
+    @files = grep(-f $_, glob($ARGV[0]));
+}
+else
+{
+    @files = grep(-f $_, glob("*"));
+}
+
+my $total = 0;
+foreach my $file (@files)
+{
+    my $size = `wc -l < $file`;
+    chomp $size;
+    $total += $size;
+    printf("%6s %s\n", $size, $file);
+}
+
+printf("Total: %s\n", $total);
