@@ -1,0 +1,30 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+
+my $argc = scalar @ARGV;
+
+if ($argc != 3)
+{
+    printf("[ERROR] Expected 3 arguments, $argc given\n");
+    exit 1;
+}
+
+my $method = $ARGV[0];
+my $hash   = $ARGV[1];
+my $path   = $ARGV[2];
+
+if ($method eq "sha256")
+{
+    system("echo $hash $path | sha256sum -c");
+}
+elsif ($method eq "sha512")
+{
+    system("echo $hash $path | sha512sum -c");
+}
+else
+{
+    printf("[ERROR] $method is not a valid option\n");
+    exit 1 ;
+}
