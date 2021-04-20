@@ -11,8 +11,6 @@
 #
 # NOTE
 #
-#     This template must be used from within the source directory.
-#
 #     A trailing slash on the source path copies the contents of the source
 #     directory rather than the directory itself.
 #
@@ -35,15 +33,13 @@
 #
 
 # Template 1: Transfer root directory
-ROOT="source"
 rsync -av \
     --exclude="/${ROOT}/.git" \
     --exclude="/${ROOT}/resources" \
-    ../${ROOT} $1
+    ../abc $1
 
 # Template 2: Transfer root directory contents
-ROOT="source"
 rsync -av \
     --exclude="/.git" \
     --exclude="/resources" \
-    ../${ROOT}/ $1
+    ../abc/ $1
