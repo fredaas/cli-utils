@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+
+import sys
+import argparse
+import subprocess
+import os
+import os.path as path
+
+def isset(argv, key):
+    value = argv[key]
+    return (value is not None) and (value is not False)
+
+def print_help():
+    """USAGE
+
+    xscp [options] <source> <target>
+
+OPTIONS
+
+    -e, --exclude <files>
+
+        Files to exclude from search.
+
+    source
+
+    target
+    """
+    print(print_help.__DOC__)
+
+def init_argparse():
+    parser = argparse.ArgumentParser(add_help=False)
+
+    parser.add_argument(
+        "-e",
+        "--exclude",
+        type = str,
+        required = False
+    )
+
+    parser.add_argument(
+        "targets",
+        nargs = 2
+    )
+
+    stderr = sys.stderr;
+    stdout = sys.stdout;
+
+    devnull = open(os.devnull, "w")
+    sys.stderr = devnull;
+    sys.stdout = devnull;
+
+    argv, error = None, False
+    try:
+        argv = vars(parser.parse_args())
+    except:
+        error = True
+
+    sys.stderr = stderr;
+    sys.stdout = stdout;
+
+    if error:
+        print("[ERROR] Invalid argument. See 'xscp -h' for usage.")
+        quit(1)
+
+    return argv
+
+if __name__ == "__main__":
+    argv = init_argparse()
+
+    source, target = argv.get("targets")
+
+    source = source.rstrip(path.sep)
+
+    if not path.exists(source):
+        print("[ERROR] Invalid source path")
+        quit(1)
+
+    rootname = path.basename(source)
+
+    excluded = []
+    if isset(argv, "exclude"):
+        for filename in argv.get("exclude").split(","):
+            excluded.append("/{}/{}".format(rootname, filename))
+
+    command = "rsync -av "
+
+    for item in excluded:
+        command += "--exclude={} ".format(item)
+
+    command += "{} {}".format(source, target)
+
+    print(command)
+
+    command = command.split(" ")
+
+    subprocess.call(command)
