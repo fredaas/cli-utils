@@ -76,7 +76,18 @@ def init_argparse():
 if __name__ == "__main__":
     argv = init_argparse()
 
-    source, target = argv.get("targets")
+    if isset(argv, "help"):
+        print_help()
+        quit(0)
+
+    targets = argv.get("targets")
+    num_targets = len(targets)
+
+    if num_targets != 2:
+        print("[ERROR] Expected 2 arguments, got {}".format(num_targets))
+        quit(1)
+
+    source, target = targets
 
     source = source.rstrip(path.sep)
 
