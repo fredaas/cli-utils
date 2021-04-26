@@ -18,14 +18,16 @@ def print_help():
 OPTIONS
 
     -e, --exclude <files>
-
-        Files to exclude from search.
+        Exclude files from search. Multiple files are separated by "," with no
+        space in between.
 
     source
+        Source directory.
 
     target
+        Target directory.
     """
-    print(print_help.__DOC__)
+    print(print_help.__doc__)
 
 def init_argparse():
     parser = argparse.ArgumentParser(add_help=False)
@@ -38,8 +40,15 @@ def init_argparse():
     )
 
     parser.add_argument(
+        "-h",
+        "--help",
+        action = "store_true",
+        required = False
+    )
+
+    parser.add_argument(
         "targets",
-        nargs = 2
+        nargs = "*"
     )
 
     stderr = sys.stderr;
