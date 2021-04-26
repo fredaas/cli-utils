@@ -35,20 +35,20 @@ def init_argparse():
     parser.add_argument(
         "-e",
         "--exclude",
-        type = str,
-        required = False
+        type=str,
+        required=False
     )
 
     parser.add_argument(
         "-h",
         "--help",
-        action = "store_true",
-        required = False
+        action="store_true",
+        required=False
     )
 
     parser.add_argument(
         "targets",
-        nargs = "*"
+        nargs="*"
     )
 
     stderr = sys.stderr;
@@ -73,6 +73,8 @@ def init_argparse():
 
     return argv
 
+separator = path.sep
+
 if __name__ == "__main__":
     argv = init_argparse()
 
@@ -89,7 +91,7 @@ if __name__ == "__main__":
 
     source, target = targets
 
-    source = source.rstrip(path.sep)
+    source = source.rstrip(separator)
 
     if not path.exists(source):
         print("[ERROR] Invalid source path")
@@ -100,7 +102,7 @@ if __name__ == "__main__":
     excluded = []
     if isset(argv, "exclude"):
         for filename in argv.get("exclude").split(","):
-            excluded.append("/{}/{}".format(rootname, filename))
+            excluded.append(separator + rootname + separator + filename)
 
     command = "rsync -av "
 
