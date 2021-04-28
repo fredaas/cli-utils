@@ -32,17 +32,10 @@ EXAMPLES
 
     --filter'+ foo/ + foo/bar.c - *' includes only foo/ and and foo/bar.c
 
-
 EXAMPLE 1: Transfer 'foo' directory
 
-    rsync -av \
-        --exclude="/foo/.git" \
-        --exclude="/foo/resources" \
-        ../foo $1
+    rsync -av --exclude=/foo/.git --exclude=/foo/resources ../foo $1
 
 EXAMPLE 2: Transfer 'foo' contents
 
-    rsync -av \
-        --exclude="/.git" \
-        --exclude="/resources" \
-        ../foo/ $1
+    rsync -av --exclude=/.git --exclude=/resources ../foo/ $1
