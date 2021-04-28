@@ -19,6 +19,9 @@ INCLUDE/EXCLUDE MATCHING
 
     Patterns ending with '/' only match directories.
 
+    Note that --filter, --exclude, and --include take one rule/pattern each.
+    Alternatively, patterns can be read from a file.
+
 EXAMPLES
 
     --filter='- *.o' excludes all matching names
