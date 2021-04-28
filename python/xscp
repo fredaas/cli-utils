@@ -18,14 +18,19 @@ def print_help():
 OPTIONS
 
     -e, --exclude <files>
-        Exclude files from search. Multiple files are separated by "," with no
-        space in between.
+        Exclude files from search. File paths must be specified relative to the
+        source directory. Multiple files are separated by "," with no space in
+        between.
 
     source
         Source directory.
 
     target
         Target directory.
+
+EXAMPLE: Exclude files from search
+
+    xscp -e foo,bar ../source target
     """
     print(print_help.__doc__)
 
