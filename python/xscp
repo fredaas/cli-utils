@@ -101,7 +101,8 @@ if __name__ == "__main__":
 
     excluded = []
     if isset(argv, "exclude"):
-        for filename in argv.get("exclude").split(","):
+        paths = [ x.lstrip(separator) for x in argv.get("exclude").split(",") ]
+        for filename in paths:
             excluded.append(separator + rootname + separator + filename)
 
     command = "rsync -av "
