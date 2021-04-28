@@ -97,6 +97,10 @@ if __name__ == "__main__":
         print("[ERROR] Invalid source path")
         quit(1)
 
+    if not path.isdir(source):
+        print("[ERROR] Source path is not a directory")
+        quit(1)
+
     rootname = path.basename(source)
 
     excluded = []
