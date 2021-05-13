@@ -2,10 +2,11 @@
 #
 # DESCRIPTION
 #
-#     Displays all months and days in the current year
+#     ASCII calendar
 #
 
 from datetime import datetime
+from datetime import date
 import calendar
 
 monthname = (
@@ -27,24 +28,41 @@ cyear = datetime.now().year
 cmonth = datetime.now().month
 cday = datetime.now().day
 
-def weekday(y, m, d):
-    return datetime(y, m, d).isocalendar()[1]
+def print_weekday(y, m, d):
+    print("\x1b[95m{:3}\x1b[0m |".format(datetime(y, m, d).isocalendar()[1]), end="")
 
-def print_sequential():
-    print(cyear, end="\n\n")
-    dseq = [ calendar.monthrange(cyear, x)[1] for x in range(1, 12 + 1) ]
-    for month, ndays in enumerate(dseq, 1):
-        print(monthname[month - 1])
-        print("-" * 33)
-        for day in range(1, ndays + 1):
-            if month == cmonth and day == cday:
-                print("[{:2}]".format(day), end=" ")
-            else:
-                print(" {:2} ".format(day), end=" ")
-            if day % 7 == 0:
-                print()
-        print()
-        if ndays % 7 != 0:
+def print_calendar_year():
+    dayspermonth = [ calendar.monthrange(cyear, x)[1] for x in range(1, 12 + 1) ]
+    daysperyear = sum(dayspermonth)
+
+    dow = datetime(cyear, 1, 1).weekday()
+
+    print_weekday(cyear, 1, 1)
+
+    for i in range(dow):
+        print("{:3}".format(""), end=" ")
+
+    day = 0
+    month = 0
+    endofmonth = False
+
+    for i in range(dow + 1, daysperyear + dow + 1):
+        if day % dayspermonth[month] == 0:
+            endofmonth = True
+        if not (day + 1 == cday and month + 1 == cmonth):
+            print("{:3}".format(day + 1), end=" ")
+        else:
+            print("\x1b[45m{:3}\x1b[0m".format(day + 1), end=" ")
+        day = (day + 1)
+        if day % dayspermonth[month] == 0:
+            day = 0
+            month += 1
+        if i % 7 == 0:
+            if endofmonth:
+                print("\x1b[95m{}\x1b[0m".format(monthname[month]), end=" ")
+                endofmonth = False
             print()
+            print_weekday(cyear, month + 1, day + 1)
+    print()
 
-print_sequential()
+print_calendar_year()
