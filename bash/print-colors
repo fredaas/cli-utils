@@ -11,7 +11,7 @@
 #
 # FORMATS
 #
-#     0 Clear all formatting
+#     0 Clear formatting
 #     1 Bold and bright
 #     2 Dim
 #     4 Underlined
@@ -21,15 +21,15 @@
 #
 # 4-BIT COLORS
 #
-#     Foreground codes: \e[format;<30-37, 90-97>
+#     Foreground codes: \e[format;<30-37,90-97>m
 #
-#     Background codes: \e[format;<40-47, 100-107>
+#     Background codes: \e[format;<40-47,100-107>m
 #
 # 8-BIT COLORS
 #
-#     Foreground codes: \e[format;38;5;<0-255>
+#     Foreground codes: \e[format;38;5;<0-255>m
 #
-#     Background codes: \e[format;48;5;<0-255>
+#     Background codes: \e[format;48;5;<0-255>m
 #
 # EXAMPLE: ATTRIBUTE COMBINATION
 #
