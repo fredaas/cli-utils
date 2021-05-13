@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-#
-# DESCRIPTION
-#
-#     ASCII calendar
-#
 
 import calendar
 import argparse
