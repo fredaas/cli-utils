@@ -5,39 +5,39 @@
 #     ASCII calendar
 #
 
+import calendar
+import argparse
+import re
+import sys
+import os
+
 from datetime import datetime
 from datetime import date
-import calendar
 
-monthname = (
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-)
+monthname = ("January", "February", "March", "April", "May", "June", "July",
+    "August", "September", "October", "November", "December" )
 
+# Target year
+tyear = datetime.now().year
+
+# Current year, month, day
 cyear = datetime.now().year
 cmonth = datetime.now().month
 cday = datetime.now().day
+
+def istoday(y, m, d):
+    return (y == cyear) and (m == cmonth) and (d == cday)
 
 def print_weekday(y, m, d):
     print("\x1b[95m{:3}\x1b[0m |".format(datetime(y, m, d).isocalendar()[1]), end="")
 
 def print_calendar_year():
-    dayspermonth = [ calendar.monthrange(cyear, x)[1] for x in range(1, 12 + 1) ]
+    dayspermonth = [ calendar.monthrange(tyear, x)[1] for x in range(1, 12 + 1) ]
     daysperyear = sum(dayspermonth)
 
-    dow = datetime(cyear, 1, 1).weekday()
+    dow = datetime(tyear, 1, 1).weekday()
 
-    print_weekday(cyear, 1, 1)
+    print_weekday(tyear, 1, 1)
 
     for i in range(dow):
         print("{:3}".format(""), end=" ")
@@ -49,7 +49,7 @@ def print_calendar_year():
     for i in range(dow + 1, daysperyear + dow + 1):
         if day % dayspermonth[month] == 0:
             endofmonth = True
-        if not (day + 1 == cday and month + 1 == cmonth):
+        if not istoday(tyear, month + 1, day + 1):
             print("{:3}".format(day + 1), end=" ")
         else:
             print("\x1b[45m{:3}\x1b[0m".format(day + 1), end=" ")
@@ -62,7 +62,76 @@ def print_calendar_year():
                 print("\x1b[95m{}\x1b[0m".format(monthname[month]), end=" ")
                 endofmonth = False
             print()
-            print_weekday(cyear, month + 1, day + 1)
+            print_weekday(tyear, month + 1, day + 1)
     print()
 
-print_calendar_year()
+def print_help():
+    """USAGE
+
+    pcalendar [options]
+
+OPTIONS
+
+    -y, --year
+        The year to show the calendar for.
+    """
+    print(print_help.__doc__)
+
+def isset(argv, key):
+    value = argv[key]
+    return (value is not None) and (value is not False)
+
+def init_argparse():
+    parser = argparse.ArgumentParser(add_help=False)
+
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
+        required=False
+    )
+
+    parser.add_argument(
+        "-y",
+        "--year",
+        type=str,
+        required=False
+    )
+
+    stderr = sys.stderr;
+    stdout = sys.stdout;
+
+    devnull = open(os.devnull, "w")
+    sys.stderr = devnull;
+    sys.stdout = devnull;
+
+    argv, error = None, False
+    try:
+        argv = vars(parser.parse_args())
+    except:
+        error = True
+
+    sys.stderr = stderr;
+    sys.stdout = stdout;
+
+    if error:
+        print("[ERROR] Invalid argument. See 'pcalendar -h' for usage.")
+        quit(1)
+
+    return argv
+
+if __name__ == "__main__":
+    argv = init_argparse()
+
+    if isset(argv, "help"):
+        print_help()
+        quit(0)
+
+    if isset(argv, "year"):
+        tyear = argv.get("year")
+        if re.match(r"^[0-9]{4}$", tyear) is None:
+            print("[ERROR] Invalid year format")
+            quit(1)
+        tyear = int(tyear)
+
+    print_calendar_year()
