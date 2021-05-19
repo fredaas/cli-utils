@@ -20,11 +20,16 @@ cyear = datetime.now().year
 cmonth = datetime.now().month
 cday = datetime.now().day
 
+FORMAT_DAY   = "{:3}"
+FORMAT_CDAY  = "\x1b[45m{:3}\x1b[0m"
+FORMAT_WEEK  = "\x1b[95m{:3}\x1b[0m"
+FORMAT_MONTH = "\x1b[95m{}\x1b[0m"
+
 def istoday(y, m, d):
     return (y == cyear) and (m == cmonth) and (d == cday)
 
-def print_weekday(y, m, d):
-    print("\x1b[95m{:3}\x1b[0m |".format(datetime(y, m, d).isocalendar()[1]), end="")
+def print_week(y, m, d):
+    print((FORMAT_WEEK + " | ").format(datetime(y, m, d).isocalendar()[1]), end="")
 
 def print_calendar_year():
     dayspermonth = [ calendar.monthrange(tyear, x)[1] for x in range(1, 12 + 1) ]
@@ -32,10 +37,10 @@ def print_calendar_year():
 
     dow = datetime(tyear, 1, 1).weekday()
 
-    print_weekday(tyear, 1, 1)
+    print_week(tyear, 1, 1)
 
     for i in range(dow):
-        print("{:3}".format(""), end=" ")
+        print(FORMAT_DAY.format(""), end=" ")
 
     day = 0
     month = 0
@@ -45,19 +50,19 @@ def print_calendar_year():
         if day % dayspermonth[month] == 0:
             endofmonth = True
         if not istoday(tyear, month + 1, day + 1):
-            print("{:3}".format(day + 1), end=" ")
+            print(FORMAT_DAY.format(day + 1), end=" ")
         else:
-            print("\x1b[45m{:3}\x1b[0m".format(day + 1), end=" ")
+            print(FORMAT_CDAY.format(day + 1), end=" ")
         day = (day + 1)
         if day % dayspermonth[month] == 0:
             day = 0
             month += 1
         if i % 7 == 0:
             if endofmonth:
-                print("\x1b[95m{}\x1b[0m".format(monthname[month]), end=" ")
+                print(FORMAT_MONTH.format(monthname[month]), end=" ")
                 endofmonth = False
             print()
-            print_weekday(tyear, month + 1, day + 1)
+            print_week(tyear, month + 1, day + 1)
     print()
 
 def print_help():
@@ -93,6 +98,13 @@ def init_argparse():
         required=False
     )
 
+    parser.add_argument(
+        "-n",
+        "--no-color",
+        action="store_true",
+        required=False
+    )
+
     stderr = sys.stderr;
     stdout = sys.stdout;
 
@@ -117,6 +129,12 @@ def init_argparse():
 
 if __name__ == "__main__":
     argv = init_argparse()
+
+    if isset(argv, "no_color"):
+        FORMAT_DAY   = "{:3}"
+        FORMAT_CDAY  = "{:3}"
+        FORMAT_WEEK  = "{:3}"
+        FORMAT_MONTH = "{}"
 
     if isset(argv, "help"):
         print_help()
