@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 #
-# pdf2png <file>
+# pdf2png <target>
 #
 # DESCRIPTION
 #
-#     Converts all pages in 'file' to pngs with the same name.
+#     Converts the target PDF file to PNG using Cairo. A separate PNG file is
+#     created for every PDF page.
 #
 
-file=$(basename -- "$1")
-outname=${file%.*}
-pdftoppm $file $outname -png -r 1000
+pdftocairo -r 500 -png "$1" "${1%.*}"

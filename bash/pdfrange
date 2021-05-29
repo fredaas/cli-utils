@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 #
-# pdfrange <file> <range>
+# pdfrange <target> <first page> <last page>
 #
 # DESCRIPTION
 #
-#     Splits each page in 'file' into a separate pdf file.
+#     Extracts the specified range (including) into a new PDF file using Cairo.
 #
 
-file=$(basename -- "$1")
-range=$2
-outname=${file%.*}
-qpdf $file --pages $file $range -- "out_${outname}.pdf"
+pdftocairo -r 500 -pdf -f "$2" -l "$3" "$1" "${1%.*}-out.pdf"
