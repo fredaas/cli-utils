@@ -1,0 +1,30 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+
+my $argc = scalar @ARGV;
+
+if ($argc != 1)
+{
+    printf("[ERROR] Expected 1 argument, $argc given\n");
+    exit 1;
+}
+
+my $target = $ARGV[0];
+
+# This will always be > 0 since executing this script will generate a match
+my @rows = grep(/$target/, split(/\n/, `ps -o pid,user,%mem,command ax`));
+
+my $total = 0;
+foreach my $item (@rows)
+{
+    my @columns = split(/ +/, $item);
+    my $mem = $columns[2];
+    if ($mem =~ /^-?\d+\.?\d*$/)
+    {
+        $total += $columns[2];
+    }
+}
+
+printf("%s memory usage: %.1f%%\n", $target, $total);
