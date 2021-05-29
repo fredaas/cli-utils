@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# pdfrange <target> <first page> <last page>
+# pdf2range <target> <first page> <last page>
 #
 # DESCRIPTION
 #
