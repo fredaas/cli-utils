@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-
 #
 # git-diff-commits <basebranch> <branch>
 #
