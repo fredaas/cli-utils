@@ -46,7 +46,7 @@ static inline void print_values(int *values)
             if (value < 10)
                 printf("%d", value);
             else
-                printf("%c", 70  - (15 - value));
+                printf("%c", 'F' - (15 - value));
         }
         else
         {
