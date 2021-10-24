@@ -1,8 +1,8 @@
 all : main
 
 main :
-	@$(MAKE) -C src
 	$(mkdir -p bin)
+	$(MAKE) -C src
 	$(shell cp src/cconv bin)
 clean :
-	@$(MAKE) clean -C src
+	$(MAKE) clean -C src
