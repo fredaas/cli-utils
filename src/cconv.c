@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 
     if (argc < 2 || argc > 3)
     {
-        printf("Usage:\n\n    cradix <value> <radix> [<decimal precision>]\n\n"
+        printf("Usage:\n\n    cconv <value> <radix source> <radix output> [<decimal precision>]\n\n"
         );
         exit(1);
     }
