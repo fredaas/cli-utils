@@ -13,7 +13,7 @@ my $argc = scalar @ARGV;
 
 if ($argc == 0)
 {
-    printf("[ERROR]\n");
+    printf("[ERROR] Search pattern cannot be empty\n");
     exit 1;
 }
 
