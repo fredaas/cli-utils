@@ -26,16 +26,16 @@ if ($argc == 2)
 
     if ($arg eq "-r")
     {
-        @branches = sort split(/\n/, `git branch -a | egrep "^\\s+remotes" | egrep "$pattern"`);
+        @branches = sort split(/\n/, `git branch -a | egrep "^\\s+remotes" | egrep $pattern`);
     }
     elsif ($arg eq "-a")
     {
-        @branches = sort split(/\n/, `git branch -a | egrep "$pattern"`);
+        @branches = sort split(/\n/, `git branch -a | egrep $pattern`);
     }
 }
 else
 {
-    @branches = sort split(/\n/, `git branch | egrep "$pattern"`);
+    @branches = sort split(/\n/, `git branch | egrep $pattern`);
 }
 
 foreach my $branch (@branches)
