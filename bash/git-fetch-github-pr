@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+if [ $# -ne 2 ]; then
+    echo "[ERROR] Expected two arguments, got $#"
+    exit 1
+fi
+
+git fetch "$1" "+refs/pull/$2/head:refs/remotes/$1/pr/$2"
+
+if [ $? -eq 0 ]; then
+    echo "Fetched pr/$2 from $1"
+else
+    echo "[ERROR] Failed to fetch pr/$2 from $1"
+fi
