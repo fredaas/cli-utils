@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+"""
+Usage:
+    c2 --string2hex <string> | --hex2string <string>
+    c2 <value> <value base> <target base>
+
+Options:
+    --string2hex <string>
+        Decode hex to string.
+
+    --hex2string <string>
+        Encode string to hex.
+"""
+
+from docopt import docopt
+from subprocess import PIPE
+
+import subprocess
+
+MODE_HEXIFY = 1
+MODE_HEXIFY_CONVERT = 2
+
+if __name__ == "__main__":
+    argv = docopt(__doc__, help=True)
+    if argv["--string2hex"]:
+        string = argv["--string2hex"]
+        # Use single quotes to pass literal value as input string. TODO:
+        # Consider changing this to escape shell interpolation, as single
+        # quotes (') can not be part of the input string with the current solution.
+        r = subprocess.run(["./main", f"{MODE_HEXIFY}", f"\"{string}\""], stderr=PIPE);
+        if r.returncode != 0:
+            print(r.stderr.decode("utf-8"))
+
+    elif argv["--hex2string"]:
+        string = argv["--hex2string"]
+        r = subprocess.run(["./main", f"{MODE_HEXIFY_CONVERT}", f"\"{string}\""], stderr=PIPE);
+        if r.returncode != 0:
+            print(r.stderr.decode("utf-8"))
