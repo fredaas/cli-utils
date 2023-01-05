@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""
+Usage:
+    ftpcopy <remote-path> <local-path> -u <username> -h <hostname> [-e <files>]
+
+Options:
+    --help
+        Print this menu.
+
+    -e, --exclude <files>
+        Files to exclude, comma separated.
+
+    -h, --hostname <hostname>
+        Hostname.
+
+    -u, --username <username>
+        Host username.
+
+    <remote-path>
+        Host directory.
+
+    <local-path>
+        Local directory.
+"""
+import glob
+import os
+import subprocess
+
+from getpass import getpass
+from docopt import docopt
+
+def main():
+    argv = docopt(__doc__, help=True)
+
+    exclude = []
+
+    if argv["--exclude"]:
+        exclude = argv["--exclude"].split(",")
+
+    user = argv["--username"]
+
+    host = argv["--hostname"]
+
+    dst = argv["<remote-path>"]
+
+    src = argv["<local-path>"]
+
+    passwd = getpass()
+
+    # If the local path is a directory, send all it's contents
+    if os.path.isdir(src):
+        dir_content = glob.glob(os.path.join(src, "*"))
+        payload = [
+            x for x in dir_content if os.path.basename(x) not in exclude
+        ]
+        for item in payload:
+            command = f"ncftpput -Rv -u {user} -p {passwd} {host} {dst} {item}"
+            subprocess.run(command.split(), check=True)
+    else:
+        item = src
+        command = f"ncftpput -v -u {user} -p {passwd} {host} {dst} {item}"
+        subprocess.run(command.split(), check=True)
+
+if __name__ == "__main__":
+    main()
