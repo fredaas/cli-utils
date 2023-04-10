@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ $# -ne 2 ]; then
-    echo "[ERROR] Expected two arguments, got $#"
+    echo "Usage: git-fetch-bitbucket-pr <origin> <prnumber>"
     exit 1
 fi
 
