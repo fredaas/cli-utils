@@ -1,150 +1,100 @@
 #!/usr/bin/env python3
+"""
+Usage:
+    pcalendar [<year> | --month]
+
+Options:
+    -h, --help
+        Print this menu.
+
+    <year>
+        Print the calendar year for the specified year. Defaults to the current year.
+
+    -m, --month
+        Print the calendar month for the current month.
+"""
 
 import calendar
-import argparse
-import re
-import sys
-import os
 
 from datetime import datetime
-from datetime import date
+from docopt import docopt
 
-monthname = ("January", "February", "March", "April", "May", "June", "July",
-    "August", "September", "October", "November", "December" )
-
-# Target year
-tyear = datetime.now().year
+# 1-base indexed month names
+monthname = [
+    None, "January", "February", "March", "April", "May", "June", "July",
+    "August", "September", "October", "November", "December" ]
 
 # Current year, month, day
-cyear = datetime.now().year
+cyear  = datetime.now().year
 cmonth = datetime.now().month
-cday = datetime.now().day
+cday   = datetime.now().day
 
 FORMAT_DAY   = "{:3}"
 FORMAT_CDAY  = "\x1b[45m{:3}\x1b[0m"
 FORMAT_WEEK  = "\x1b[95m{:3}\x1b[0m"
 FORMAT_MONTH = "\x1b[95m{}\x1b[0m"
 
-def istoday(y, m, d):
+def is_today(y, m, d):
     return (y == cyear) and (m == cmonth) and (d == cday)
 
+def print_day(y, m, d):
+    if not is_today(y, m, d):
+        print(FORMAT_DAY.format(d), end=" ")
+    else:
+        print(FORMAT_CDAY.format(d), end=" ")
+
 def print_week(y, m, d):
-    print((FORMAT_WEEK + " | ").format(datetime(y, m, d).isocalendar()[1]), end="")
+    print((FORMAT_WEEK + " | ").format(datetime(y, m, d).isocalendar().week), end="")
 
-def print_calendar_year():
-    dayspermonth = [ calendar.monthrange(tyear, x)[1] for x in range(1, 12 + 1) ]
-    daysperyear = sum(dayspermonth)
+def print_month(m):
+    print(FORMAT_MONTH.format(monthname[m]), end=" ")
 
-    dow = datetime(tyear, 1, 1).weekday()
+def print_calendar_year(y):
+    print_calendar_month(y, 1)
+    for m in range(2, 13):
+        print_calendar_month(y, m, chain=True)
 
-    print_week(tyear, 1, 1)
+def print_calendar_month(y, m, chain=False):
+    dow, days = calendar.monthrange(y, m)
 
-    for i in range(dow):
-        print(FORMAT_DAY.format(""), end=" ")
+    # Only print week number if not chained or if day of the week is zero,
+    # i.e. the first day of the week.
+    if not chain or dow == 0:
+        print_week(y, m, 1)
+        for _ in range(dow):
+            print(FORMAT_DAY.format(""), end=" ")
 
-    day = 0
-    month = 0
-    endofmonth = False
+    start_of_week  = False
+    start_of_month = True
 
-    for i in range(dow + 1, daysperyear + dow + 1):
-        if day % dayspermonth[month] == 0:
-            endofmonth = True
-        if not istoday(tyear, month + 1, day + 1):
-            print(FORMAT_DAY.format(day + 1), end=" ")
-        else:
-            print(FORMAT_CDAY.format(day + 1), end=" ")
-        day = (day + 1)
-        if day % dayspermonth[month] == 0:
-            day = 0
-            month += 1
-        if i % 7 == 0:
-            if endofmonth:
-                print(FORMAT_MONTH.format(monthname[month]), end=" ")
-                endofmonth = False
+    for d in range(1, days + 1):
+        if start_of_week:
+            print_week(y, m, d)
+            start_of_week = False
+
+        print_day(y, m, d)
+
+        dow = (dow + 1) % 7
+
+        if dow == 0:
+            if start_of_month:
+                print_month(m)
+                start_of_month = False
             print()
-            print_week(tyear, month + 1, day + 1)
-    print()
-
-def print_help():
-    """USAGE
-
-    pcalendar [options]
-
-OPTIONS
-
-    -y, --year
-        The year to show the calendar for.
-    """
-    print(print_help.__doc__)
-
-def isset(argv, key):
-    value = argv[key]
-    return (value is not None) and (value is not False)
-
-def init_argparse():
-    parser = argparse.ArgumentParser(add_help=False)
-
-    parser.add_argument(
-        "-h",
-        "--help",
-        action="store_true",
-        required=False
-    )
-
-    parser.add_argument(
-        "-y",
-        "--year",
-        type=str,
-        required=False
-    )
-
-    parser.add_argument(
-        "-n",
-        "--no-color",
-        action="store_true",
-        required=False
-    )
-
-    stderr = sys.stderr;
-    stdout = sys.stdout;
-
-    devnull = open(os.devnull, "w")
-    sys.stderr = devnull;
-    sys.stdout = devnull;
-
-    argv, error = None, False
-    try:
-        argv = vars(parser.parse_args())
-    except:
-        error = True
-
-    sys.stderr = stderr;
-    sys.stdout = stdout;
-
-    if error:
-        print("[ERROR] Invalid argument. See 'pcalendar -h' for usage.")
-        quit(1)
-
-    return argv
+            start_of_week = True
 
 if __name__ == "__main__":
-    argv = init_argparse()
+    argv = docopt(__doc__, help=True)
 
-    if isset(argv, "no_color"):
-        FORMAT_DAY   = "{:3}"
-        FORMAT_CDAY  = "{:3}"
-        FORMAT_WEEK  = "{:3}"
-        FORMAT_MONTH = "{}"
+    if argv["<year>"]:
+        year = int(argv["<year>"])
+        print_calendar_year(year)
+        print()
+        exit(0)
 
-    if isset(argv, "help"):
-        print_help()
-        quit(0)
+    if argv["--month"]:
+        print_calendar_month(cyear, cmonth)
+        print()
+        exit(0)
 
-    if isset(argv, "year"):
-        tyear = argv.get("year")
-        if re.match(r"^[0-9]{4}$", tyear) is None:
-            print("[ERROR] Invalid year format")
-            quit(1)
-        tyear = int(tyear)
-
-    print_calendar_year()
+    print_calendar_year(cyear)
