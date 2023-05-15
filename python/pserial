@@ -4,17 +4,28 @@ import re
 
 from serial.tools.list_ports import comports
 
-class VID:
-    xilinx = 1027
+ports = comports()
 
-def get_com_ports(vid):
-    com_ports =  [ x.device for x in comports() if x.vid == vid ]
+def get_items():
+    items = {}
+    for item in ports:
+        value = item.serial_number
+        if value and value not in items:
+            items[value] = { "vendor_id": item.vid, "vendor_name": item.manufacturer, "com_ports": get_com_ports(value) }
+    return items
+
+def get_com_ports(serial_number):
+    if not serial_number:
+        return []
+    com_ports = [ x.device for x in ports if x.serial_number == serial_number ]
     return sorted(com_ports, key=lambda x: int(re.search(r"\d+", x).group(0)))
 
-def print_com_ports(vid):
-    com_ports = get_com_ports(vid)
-    for item in com_ports:
-        print(item)
+def print_items():
+    items = get_items()
+    for k,v in items.items():
+        print("{} ({}):".format(k, v["vendor_name"]))
+        for x in v["com_ports"]:
+            print(4 * " " + x)
 
 if __name__ == '__main__':
-    print_com_ports(VID.xilinx)
+    print_items()
