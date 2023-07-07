@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
-#
-# cat-ssh <key> <host>
-#
-# DESCRIPTION
-#
-#     Appends 'key' to .ssh/authorized_keys in 'host'.
-#
 
-cat "$1" | ssh "$2" "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 700 -R ~/.ssh"
+fun::print_usage()
+{
+cat << EOF
+Usage:
+    cat-ssh <public key> <host>
+
+Options:
+    <public key>
+        Path to the public key to upload.
+
+    <host>
+        Target host.
+EOF
+}
+
+[[ "$#" -ne 2 ]] && fun::print_usage && exit 1
+
+cat "$1" | ssh "$2" "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
