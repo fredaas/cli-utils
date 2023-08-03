@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+fun_exit()
+{
+    cat << EOF
+Usage:
+    dtc-decompile <device tree path>
+EOF
+
+    exit 1
+}
+
+[[ -z "$1" ]] && fun_exit
+
+IN_FILE="$1"
+OUT_FILE="${1%.*}.dts"
+
+dtc -I "dtb" -O "dts" -o $OUT_FILE $IN_FILE
