@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-fun_exit()
+fun::exit()
 {
     cat << EOF
 Usage:
@@ -10,7 +10,7 @@ EOF
     exit 1
 }
 
-[[ -z "$1" ]] && fun_exit
+[[ -z "$1" ]] && fun::exit
 
 IN_FILE="$1"
 OUT_FILE="${1%.*}.dts"
