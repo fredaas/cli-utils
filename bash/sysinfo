@@ -7,4 +7,4 @@
 
 distro=`cat /etc/lsb-release | grep "DISTRIB_DESCRIPTION" | cut -d "=" -f 2 | sed 's/"//g'`
 kernel=`uname -r -s`
-echo "$kernel, $distro"
+echo "$kernel, $distro, $XDG_SESSION_TYPE"
