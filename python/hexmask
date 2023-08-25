@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-print("{Hex mask} /* {Bit position} */")
+print("Bit position: Hex mask")
 
 for x in range(32):
     val = 1 << x
-    print("0x{:012X} /* {} */".format(val, x))
+    print("/* {:2}: 0x{:012X} */".format(x, val))
