@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+fun::usage()
+{
+    cat << EOF
+Usage:
+    cert <options>
+
+Options:
+    show
+        Echo x509 certificate contents in plain text.
+EOF
+    exit 0
+}
+
+fun::error()
+{
+    cat << EOF
+Invalid arguments, see 'cert help' for usage.
+EOF
+    exit 1
+}
+
+fun::show()
+{
+    [[ -z "$1" ]] && fun::error
+    openssl x509 -in "$1" -text
+    exit 0
+}
+
+case "$1" in
+"show")
+    fun::show "$2"
+    ;;
+"help")
+    fun::usage
+    ;;
+*)
+    fun::exit
+    ;;
+esac
