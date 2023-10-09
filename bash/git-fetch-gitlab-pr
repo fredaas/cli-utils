@@ -4,13 +4,13 @@ set -e
 
 fun::exit()
 {
-    echo "Usage: git-fetch-bitbucket-pr <origin> <request_id>"
+    echo "Usage: git-fetch-gitlab-pr <origin> <request_id>"
     exit 1
 }
 
 [[ "$#" -ne 2 ]] && fun::exit
 
-SOURCE="+refs/pull-requests/$2/from"
+SOURCE="merge-requests/$2/head"
 TARGET="refs/remotes/$1/pr/$2"
 
 git fetch "$1" "$SOURCE:$TARGET" && git checkout pr/$2

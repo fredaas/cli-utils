@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 
-if [ $# -ne 2 ]; then
-    echo "Usage: git-fetch-github-pr <origin> <prnumber>"
+set -e
+
+fun::exit()
+{
+    echo "Usage: git-fetch-github-pr <origin> <request_id>"
     exit 1
-fi
+}
 
-git fetch "$1" "+refs/pull/$2/head:refs/remotes/$1/pr/$2"
+[[ "$#" -ne 2 ]] && fun::exit
 
-if [ $? -eq 0 ]; then
-    echo "Fetched pr/$2 from $1"
-else
-    echo "[ERROR] Failed to fetch pr/$2 from $1"
-fi
+
+SOURCE="+refs/pull/$2/head"
+TARGET="refs/remotes/$1/pr/$2"
+
+git fetch "$1" "$SOURCE:$TARGET" && git checkout pr/$2
