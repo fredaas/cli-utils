@@ -10,7 +10,6 @@ fun::exit()
 
 [[ "$#" -ne 2 ]] && fun::exit
 
-
 SOURCE="+refs/pull/$2/head"
 TARGET="refs/remotes/$1/pr/$2"
 
