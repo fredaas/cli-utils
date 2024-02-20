@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""
+Usage:
+    git-diff [-e <extensions>] [-s] [-t <target>] [-u] [-p <paths>] [-n <count>]
+
+Options:
+    -h, --help
+        Print this menu.
+
+    -e <extensions>
+        Check these extensions. Defaults to '-e py,c,h'.
+
+    -s
+        Check staged commits.
+
+    -u
+        Check unstaged files.
+
+    -p <paths>
+        Check this these directories or files.
+
+    -t <target>
+        Check all commits since the common ancestor in <target>. Defaults to '-t master'.
+
+    -n <count>
+        Check the last 'n' commits.
+"""
+
+import os
+import subprocess as proc
+import re
+
+from docopt import docopt
+
+OPTION_COMMITS   = 0b0001
+OPTION_UNTRACKED = 0b0010
+OPTION_STAGED    = 0b0100
+OPTION_COUNT     = 0b1000
+
+TARGET_BRANCH = 'master'
+
+VALID_EXTENSIONS = [ 'c', 'py', 'h' ]
+
+class Filter:
+    EXTENSIONS = None
+    PATHS  = ''
+
+def git_merge_base(target, source):
+    ret = proc.run(f'git merge-base {target} {source}'.split(),
+            check=True, text=True, stdout=proc.PIPE)
+    return ret.stdout.strip()
+
+def git_diff(options, **kwargs):
+    files = []
+
+    if (options & OPTION_COUNT):
+        count = kwargs['count']
+        ret = proc.run(f'git diff --name-only HEAD~{count}'.split(),
+                check=True, text=True, stdout=proc.PIPE)
+        files += ret.stdout.strip().split()
+
+    if (options & OPTION_COMMITS):
+        sha_from = git_merge_base(TARGET_BRANCH, 'HEAD')
+        sha_to = git_merge_base('HEAD', 'HEAD')
+        ret = proc.run(f'git diff --name-only {sha_from} {sha_to} {Filter.PATHS}'.split(),
+                check=True, text=True, stdout=proc.PIPE)
+        files += ret.stdout.strip().split()
+
+    if (options & OPTION_UNTRACKED):
+        ret = proc.run('git ls-files --others --exclude-standard'.split(),
+                check=True, text=True, stdout=proc.PIPE)
+        files += ret.stdout.strip().split()
+
+    if (options & OPTION_STAGED):
+        ret = proc.run(f'git diff --name-only --staged {Filter.PATHS}'.split(),
+                check=True, text=True, stdout=proc.PIPE)
+        files += ret.stdout.strip().split()
+
+    stripped_files = [ x for x in files if re.search(Filter.EXTENSIONS, x) ]
+
+    stripped_files.sort(key=lambda x: re.search(Filter.EXTENSIONS, x).group(0))
+
+    return stripped_files
+
+if __name__ == '__main__':
+    argv = docopt(__doc__, help=True)
+
+    # Default pattern
+    Filter.EXTENSIONS = re.compile(r'\.({})$'.format('|'.join(VALID_EXTENSIONS)))
+
+    if argv['-e']:
+        items = argv['-e'].split(',')
+        for ext in items:
+            if ext not in VALID_EXTENSIONS:
+                print(f"[ERROR] Invalid extension '{ext}'")
+                exit(1)
+        Filter.EXTENSIONS = re.compile(r'\.({})$'.format('|'.join(items)))
+
+    if argv['-p']:
+        Filter.PATHS = '-- {}'.format(' '.join(argv['-p'].split(',')))
+
+    options = OPTION_COMMITS
+
+    kwargs = {}
+
+    if argv['-n']:
+        options = OPTION_COUNT
+        kwargs = { 'count': argv['-n'] }
+
+    if argv['-t']:
+        TARGET_BRANCH = argv['-t']
+
+    if argv['-s']:
+        options = OPTION_STAGED
+
+    if argv['-u']:
+        options = OPTION_UNTRACKED
+
+    files = git_diff(options, **kwargs)
+
+    for item in files:
+        print(item)
