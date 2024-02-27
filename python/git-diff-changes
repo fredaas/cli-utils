@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Usage:
-    git-diff [-e <extensions>] [-s] [-t <target>] [-u] [-p <paths>] [-n <count>]
+    git-diff [-e <extensions>] [-s] [-u] [-t] [-b <branch>] [-p <paths>] [-n <count>]
 
 Options:
     -h, --help
@@ -11,19 +11,22 @@ Options:
         Check these extensions. Defaults to '-e py,c,h'.
 
     -s
-        Check staged commits.
+        Check only staged files.
 
     -u
-        Check unstaged files.
+        Check only unstaged files.
+
+    -t
+        Check only untracked files.
 
     -p <paths>
-        Check this these directories or files.
+        Check only these paths.
 
-    -t <target>
-        Check all commits since the common ancestor in <target>. Defaults to '-t master'.
+    -b <branch>
+        Check all commits since the common ancestor in <branch>. Defaults to '-b master'.
 
     -n <count>
-        Check the last 'n' commits.
+        Check the last <count> commits.
 """
 
 import os
@@ -32,10 +35,11 @@ import re
 
 from docopt import docopt
 
-OPTION_COMMITS   = 0b0001
-OPTION_UNTRACKED = 0b0010
-OPTION_STAGED    = 0b0100
-OPTION_COUNT     = 0b1000
+OPTION_COMMITS   = 0b00001
+OPTION_UNTRACKED = 0b00010
+OPTION_STAGED    = 0b00100
+OPTION_UNSTAGED  = 0b01000
+OPTION_COUNT     = 0b10000
 
 TARGET_BRANCH = 'master'
 
@@ -76,6 +80,11 @@ def git_diff(options, **kwargs):
                 check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
+    if (options & OPTION_UNSTAGED):
+        ret = proc.run(f'git diff --name-only {Filter.PATHS}'.split(),
+                check=True, text=True, stdout=proc.PIPE)
+        files += ret.stdout.strip().split()
+
     stripped_files = [ x for x in files if re.search(Filter.EXTENSIONS, x) ]
 
     stripped_files.sort(key=lambda x: re.search(Filter.EXTENSIONS, x).group(0))
@@ -99,7 +108,7 @@ if __name__ == '__main__':
     if argv['-p']:
         Filter.PATHS = '-- {}'.format(' '.join(argv['-p'].split(',')))
 
-    options = OPTION_COMMITS
+    options = OPTION_COMMITS | OPTION_UNSTAGED | OPTION_STAGED | OPTION_UNTRACKED
 
     kwargs = {}
 
@@ -107,13 +116,16 @@ if __name__ == '__main__':
         options = OPTION_COUNT
         kwargs = { 'count': argv['-n'] }
 
-    if argv['-t']:
-        TARGET_BRANCH = argv['-t']
+    if argv['-b']:
+        TARGET_BRANCH = argv['-b']
 
     if argv['-s']:
         options = OPTION_STAGED
 
     if argv['-u']:
+        options = OPTION_UNSTAGED
+
+    if argv['-t']:
         options = OPTION_UNTRACKED
 
     files = git_diff(options, **kwargs)
