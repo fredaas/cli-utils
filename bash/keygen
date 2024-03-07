@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+
+# CLI options
+DAYS=365
+OUTNAME=
+CA=
+CAKEY=
+ARGV=()
+COMMAND=
+SAN="subjectAltName=DNS:localhost,IP:127.0.0.1"
+
+# Constants
+SUBJ_CA="/C=NO/ST=Norway/L=Trondheim/O=FooBar/OU=R&D/CN=FooBar"
+SUBJ="/C=NO/ST=Norway/L=Trondheim/O=FooBar/OU=R&D/CN=localhost"
+
+ssl_gen_rsa()
+{
+    openssl genrsa -out $OUTNAME.key 2048
+}
+
+ssl_gen_rootca()
+{
+    openssl req -new -x509 -days 365 -key $OUTNAME.key -out $OUTNAME.crt \
+      -subj ${SUBJ_CA}
+}
+
+ssl_gen_csr()
+{
+    openssl req -new -key $OUTNAME.key -out $OUTNAME.csr -subj ${SUBJ}
+}
+
+ssl_sign_csr()
+{
+    openssl x509 -req -days 365 -in $OUTNAME.csr -CA $CA \
+        -CAkey $CAKEY -set_serial 01 -out $OUTNAME.crt \
+        -extfile <(printf $SAN)
+}
+
+ssl_show()
+{
+    openssl x509 -noout -text -in "$1"
+}
+
+arg_print_usage()
+{
+    cat << EOF
+Usage:
+    keygen.sh root --out <name> [--days <days>]
+    keygen.sh cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>]
+    keygen.sh show <path>
+EOF
+}
+
+arg_print_full_usage()
+{
+    cat << EOF
+Usage:
+    keygen.sh root --out <name> [--days <days>]
+    keygen.sh cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>]
+    keygen.sh show <path>
+
+Options:
+    root
+        Generate self-signed x509 root CA certificate.
+
+    cert
+        Generate x509 certificate.
+
+    show <path>
+        Print contents of certificate specified in <path>.
+
+    --cakey <path>
+        Full path to CA key.
+
+    --ca <path>
+        Full path to CA certficate.
+
+    --out <name>
+        File output name without extension.
+
+    --days <days>
+        Number of days the certificate will be valid for. Defaults to 365.
+
+    --san <string>
+        Comma-separated string of Subject Alternative Name (SAN) names. Only relevant for server
+        certificates. Defaults to "DNS:localhost,IP:127.0.0.1". New SAN names will be appended to
+        the default string.
+EOF
+}
+
+arg_parse()
+{
+    while [[ "$#" -gt  0 ]]; do
+        case "$1" in
+        "-h" | "--help")
+            arg_print_full_usage && exit 0
+            ;;
+        "--san")
+            SAN="${SAN},$2"
+            shift; shift;
+            ;;
+        "--cakey")
+            CAKEY="$2"
+            shift; shift;
+            ;;
+        "--ca")
+            CA="$2"
+            shift; shift;
+            ;;
+        "--days")
+            DAYS="$2"
+            shift; shift;
+            ;;
+        "--out")
+            OUTNAME="$2"
+            shift; shift;
+            ;;
+        *)
+            ARGV+=("$1")
+            shift;
+            ;;
+        esac
+    done
+
+    COMMAND=${ARGV[0]}
+
+    [[ ! "$COMMAND" =~ ^(root|cert|show)$ ]] && echo "Error: Invalid command: '$COMMAND'" && arg_print_usage && exit 1
+
+    if [[ "$COMMAND" == "cert" ]]; then
+        [[ -z "$DAYS" || -z "$OUTNAME" || -z "$CA" || -z "$CAKEY" ]] && echo "Error: Missing argument(s)" && arg_print_usage && exit 1
+    fi
+
+    if [[ "$COMMAND" == "root" ]]; then
+        [[ -z "$DAYS" || -z "$OUTNAME" ]] && echo "Error: Missing argument(s)" && arg_print_usage && exit 1
+    fi
+}
+
+arg_parse "$@"
+
+if [[ "$COMMAND" == "show" ]]; then
+    ssl_show ${ARGV[1]}
+fi
+
+if [[ "$COMMAND" == "root" ]]; then
+    ssl_gen_rsa && ssl_gen_rootca
+fi
+
+if [[ "$COMMAND" == "cert" ]]; then
+    ssl_gen_rsa && ssl_gen_csr && ssl_sign_csr
+fi
