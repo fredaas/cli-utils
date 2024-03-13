@@ -45,9 +45,9 @@ arg_print_usage()
 {
     cat << EOF
 Usage:
-    keygen.sh root --out <name> [--days <days>]
-    keygen.sh cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>]
-    keygen.sh show <path>
+    keygen root --out <name> [--days <days>]
+    keygen cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>]
+    keygen show <path>
 EOF
 }
 
@@ -55,9 +55,9 @@ arg_print_full_usage()
 {
     cat << EOF
 Usage:
-    keygen.sh root --out <name> [--days <days>]
-    keygen.sh cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>]
-    keygen.sh show <path>
+    keygen root --out <name> [--days <days>]
+    keygen cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>]
+    keygen show <path>
 
 Options:
     root
