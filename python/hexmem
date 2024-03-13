@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""
+Usage:
+    hexmem <value>
+
+<value>
+    The value, in bytes, to convert.
+"""
+import math
+
+from docopt import docopt
+
+argv = docopt(__doc__, help=True)
+val = int(argv['<value>'])
+exp = math.ceil(math.log(val, 2))
+new_val = 2**exp
+print(hex(new_val), new_val)
