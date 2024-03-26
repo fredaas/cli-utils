@@ -3,40 +3,41 @@
 Usage:
     hexaddr [-b <size>] [-n <count>]
 
+Compute a range of hex addresses.
+
 Options:
     --help
         Print this menu.
 
     -b <size>
-        Word size in bytes. Default 4. Possible values: 1, 2, 4, 8, 16.
+        Bytes per address. Defaults to 4.
 
     -n <count>
         Number of permutation to print. Default: 8.
 """
 from docopt import docopt
 
+from math import log, floor
+
 def main():
     argv = docopt(__doc__, help=True)
 
-    size = 4
     count = 8
-
     if argv["-n"]:
         count = int(argv["-n"])
+    count = max(1, count)
 
+    nbytes = 4
     if argv["-b"]:
-        size = int(argv["-b"])
+        nbytes = int(argv["-b"])
+    nbytes = max(1, nbytes)
 
-    if size not in [1, 2, 4, 8, 16]:
-        print("ERROR: Invalid size '{}'".format(size))
-        exit(1)
-
-    if count < 0:
-        print("ERROR: Invalid count '{}'".format (count))
-        exit(1)
+    maxval = nbytes * (count - 1)
+    maxdigits = floor(log(maxval, 16)) + 1
+    fstring = "0x{:0" + str(maxdigits) + "X}"
 
     for i in range(count):
-        val = i * size
-        print("0x{:012X}".format(val))
+        val = i * nbytes
+        print(fstring.format(val))
 
 main()

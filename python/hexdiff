@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""
+Usage:
+    hexdiff <start> <end> [-b <nbytes>]
+
+Compute the number of addresses between two hex addresses.
+
+Options:
+    <start>
+        Start hex address.
+
+    <end>
+        End hex address.
+
+    -b <nbytes>
+        Bytes per address. Defaults to 4.
+"""
+from docopt import docopt
+
+argv = docopt(__doc__, help=True)
+
+nbytes = 4
+
+if argv['-b']:
+    nbytes = int(argv['-b'])
+
+addr_start = int(argv['<start>'], 16)
+addr_end = int(argv['<end>'], 16)
+
+diff = ((addr_end - addr_start) - nbytes) / nbytes
+
+print("{}".format(int(diff)))

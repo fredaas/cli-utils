@@ -3,15 +3,20 @@
 Usage:
     hexmem <value>
 
-<value>
-    The value, in bytes, to convert.
-"""
-import math
+Compute the base-2 memory size from a given value.
 
+Options:
+    <value>
+        The value, in bytes, to convert.
+"""
 from docopt import docopt
 
+from math import log, ceil
+
 argv = docopt(__doc__, help=True)
+
 val = int(argv['<value>'])
-exp = math.ceil(math.log(val, 2))
-new_val = 2**exp
-print(hex(new_val), new_val)
+val = max(1, val)
+exp = ceil(log(val, 2))
+val = 2**exp
+print(hex(val), val)

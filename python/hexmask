@@ -3,6 +3,8 @@
 Usage:
     hexmask [-n <count>]
 
+Compute a hexmask range.
+
 Options:
     --help
         Print this menu.
@@ -12,6 +14,8 @@ Options:
 """
 from docopt import docopt
 
+from math import log, floor
+
 def main():
     argv = docopt(__doc__, help=True)
 
@@ -20,12 +24,13 @@ def main():
     if argv["-n"]:
         count = int(argv["-n"])
 
-    if count < 0:
-        print("ERROR: Invalid count '{}'".format (count))
-        exit(1)
+    count = max(1, count)
+
+    maxval = 1 << (count - 1)
+    maxdigits = floor(log(maxval, 16)) + 1
+    fstring = "0x{:0" + str(maxdigits) + "X}"
 
     for i in range(count):
-        val = 1 << i
-        print("0x{:012X}".format(val))
+        print(fstring.format(1 << i))
 
 main()
