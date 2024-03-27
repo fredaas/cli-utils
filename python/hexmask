@@ -6,9 +6,6 @@ Usage:
 Compute a hexmask range.
 
 Options:
-    --help
-        Print this menu.
-
     -n <count>
         Number of permutations to print. Default: 8.
 """

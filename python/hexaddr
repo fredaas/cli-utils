@@ -6,9 +6,6 @@ Usage:
 Compute a range of hex addresses.
 
 Options:
-    --help
-        Print this menu.
-
     -b <size>
         Bytes per address. Defaults to 4.
 
