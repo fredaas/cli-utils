@@ -7,11 +7,11 @@ CA=
 CAKEY=
 ARGV=()
 COMMAND=
+CN=
 SAN="subjectAltName=DNS:localhost,IP:127.0.0.1"
 
 # Constants
-SUBJ_CA="/C=NO/ST=Norway/L=Trondheim/O=FooBar/OU=R&D/CN=FooBar"
-SUBJ="/C=NO/ST=Norway/L=Trondheim/O=FooBar/OU=R&D/CN=localhost"
+SUBJ="/C=NO/ST=Norway/L=Trondheim/O=FooBar/OU=R&D"
 
 ssl_gen_rsa()
 {
@@ -21,7 +21,7 @@ ssl_gen_rsa()
 ssl_gen_rootca()
 {
     openssl req -new -x509 -days 365 -key $OUTNAME.key -out $OUTNAME.crt \
-      -subj ${SUBJ_CA}
+      -subj ${SUBJ}
 }
 
 ssl_gen_csr()
@@ -31,9 +31,8 @@ ssl_gen_csr()
 
 ssl_sign_csr()
 {
-    openssl x509 -req -days 365 -in $OUTNAME.csr -CA $CA \
-        -CAkey $CAKEY -set_serial 01 -out $OUTNAME.crt \
-        -extfile <(printf $SAN)
+    openssl x509 -req -days 365 -in $OUTNAME.csr -CA $CA -CAkey $CAKEY -out $OUTNAME.crt \
+        -extfile <(printf "%s" $SAN)
 }
 
 ssl_show()
@@ -46,7 +45,7 @@ arg_print_usage()
     cat << EOF
 Usage:
     keygen root --out <name> [--days <days>]
-    keygen cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>]
+    keygen cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>] [--cn <string>]
     keygen show <path>
 EOF
 }
@@ -68,6 +67,9 @@ Options:
 
     show <path>
         Print contents of certificate specified in <path>.
+
+    --cn <string>
+        Common name string.
 
     --cakey <path>
         Full path to CA key.
@@ -94,6 +96,10 @@ arg_parse()
         case "$1" in
         "-h" | "--help")
             arg_print_full_usage && exit 0
+            ;;
+        "--cn")
+            CN="$2"
+            shift; shift;
             ;;
         "--san")
             SAN="${SAN},$2"
@@ -124,6 +130,10 @@ arg_parse()
 
     COMMAND=${ARGV[0]}
 
+    [[ -z $CN ]] && CN="FooBar" && echo "Warning: CN not set, using default CN: ${CN}"
+
+    SUBJ="${SUBJ}/CN=${CN}"
+
     [[ ! "$COMMAND" =~ ^(root|cert|show)$ ]] && echo "Error: Invalid command: '$COMMAND'" && arg_print_usage && exit 1
 
     if [[ "$COMMAND" == "cert" ]]; then
@@ -138,7 +148,7 @@ arg_parse()
 arg_parse "$@"
 
 if [[ "$COMMAND" == "show" ]]; then
-    ssl_show ${ARGV[1]}
+    ssl_show "${ARGV[1]}"
 fi
 
 if [[ "$COMMAND" == "root" ]]; then
