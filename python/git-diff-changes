@@ -8,7 +8,7 @@ Options:
         Print this menu.
 
     -e <extensions>
-        Check these extensions. Defaults to '-e py,c,h'.
+        Check these extensions. Example: '-e py,c,h'.
 
     -s
         Check only staged files.
@@ -35,38 +35,36 @@ import re
 
 from docopt import docopt
 
-OPTION_COMMITS   = 0b00001
-OPTION_UNTRACKED = 0b00010
-OPTION_STAGED    = 0b00100
-OPTION_UNSTAGED  = 0b01000
-OPTION_COUNT     = 0b10000
+OPTION_COMMITS           = 0b00001
+OPTION_UNTRACKED         = 0b00010
+OPTION_STAGED            = 0b00100
+OPTION_UNSTAGED          = 0b01000
+OPTION_COUNT             = 0b10000
 
 TARGET_BRANCH = 'master'
 
-VALID_EXTENSIONS = [ 'c', 'py', 'h' ]
-
-class Filter:
-    EXTENSIONS = None
-    PATHS  = ''
+class Flag:
+    EXTENSIONS = None # Only list these extensions
+    PATHS  = ''       # Only list these paths
+    COUNT = 0         # Only check these commits
 
 def git_merge_base(target, source):
     ret = proc.run(f'git merge-base {target} {source}'.split(),
             check=True, text=True, stdout=proc.PIPE)
     return ret.stdout.strip()
 
-def git_diff(options, **kwargs):
+def git_diff(options):
     files = []
 
     if (options & OPTION_COUNT):
-        count = kwargs['count']
-        ret = proc.run(f'git diff --name-only HEAD~{count}'.split(),
+        ret = proc.run(f'git diff --name-only HEAD~{Flag.COUNT}'.split(),
                 check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
     if (options & OPTION_COMMITS):
         sha_from = git_merge_base(TARGET_BRANCH, 'HEAD')
         sha_to = git_merge_base('HEAD', 'HEAD')
-        ret = proc.run(f'git diff --name-only {sha_from} {sha_to} {Filter.PATHS}'.split(),
+        ret = proc.run(f'git diff --name-only {sha_from} {sha_to} {Flag.PATHS}'.split(),
                 check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
@@ -76,48 +74,42 @@ def git_diff(options, **kwargs):
         files += ret.stdout.strip().split()
 
     if (options & OPTION_STAGED):
-        ret = proc.run(f'git diff --name-only --staged {Filter.PATHS}'.split(),
+        ret = proc.run(f'git diff --name-only --staged {Flag.PATHS}'.split(),
                 check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
     if (options & OPTION_UNSTAGED):
-        ret = proc.run(f'git diff --name-only {Filter.PATHS}'.split(),
+        ret = proc.run(f'git diff --name-only {Flag.PATHS}'.split(),
                 check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
-    stripped_files = [ x for x in files if re.search(Filter.EXTENSIONS, x) ]
+    if not Flag.EXTENSIONS:
+        return files
 
-    stripped_files.sort(key=lambda x: re.search(Filter.EXTENSIONS, x).group(0))
+    stripped_files = [ x for x in files if re.search(Flag.EXTENSIONS, x) ]
+
+    stripped_files.sort(key=lambda x: re.search(Flag.EXTENSIONS, x).group(0))
 
     return stripped_files
 
 if __name__ == '__main__':
     argv = docopt(__doc__, help=True)
 
-    # Default pattern
-    Filter.EXTENSIONS = re.compile(r'\.({})$'.format('|'.join(VALID_EXTENSIONS)))
+    options = OPTION_COMMITS | OPTION_UNSTAGED | OPTION_STAGED | OPTION_UNTRACKED
+
+    if argv['-p']:
+        Flag.PATHS = '-- {}'.format(' '.join(argv['-p'].split(',')))
 
     if argv['-e']:
         items = argv['-e'].split(',')
-        for ext in items:
-            if ext not in VALID_EXTENSIONS:
-                print(f"[ERROR] Invalid extension '{ext}'")
-                exit(1)
-        Filter.EXTENSIONS = re.compile(r'\.({})$'.format('|'.join(items)))
-
-    if argv['-p']:
-        Filter.PATHS = '-- {}'.format(' '.join(argv['-p'].split(',')))
-
-    options = OPTION_COMMITS | OPTION_UNSTAGED | OPTION_STAGED | OPTION_UNTRACKED
-
-    kwargs = {}
-
-    if argv['-n']:
-        options = OPTION_COUNT
-        kwargs = { 'count': argv['-n'] }
+        Flag.EXTENSIONS = re.compile(r'\.({})$'.format('|'.join(items)))
 
     if argv['-b']:
         TARGET_BRANCH = argv['-b']
+
+    if argv['-n']:
+        Flag.COUNT = argv['-n']
+        options = OPTION_COUNT
 
     if argv['-s']:
         options = OPTION_STAGED
@@ -128,7 +120,7 @@ if __name__ == '__main__':
     if argv['-t']:
         options = OPTION_UNTRACKED
 
-    files = git_diff(options, **kwargs)
+    files = git_diff(options)
 
     for item in files:
         print(item)
