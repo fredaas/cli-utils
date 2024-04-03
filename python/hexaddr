@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """
 Usage:
-    hexaddr [-b <size>] [-n <count>]
+    hexaddr [-b <size>] [-n <count>] [-s <start>]
 
 Compute a range of hex addresses.
 
 Options:
+    -s <start>
+        Start address.
+
     -b <size>
         Bytes per address. Defaults to 4.
 
@@ -18,6 +21,11 @@ from math import log, floor
 
 def main():
     argv = docopt(__doc__, help=True)
+
+    start = 0
+    if argv["-s"]:
+        start = int(argv["-s"])
+    start = max(0, start)
 
     count = 8
     if argv["-n"]:
@@ -34,7 +42,7 @@ def main():
     fstring = "0x{:0" + str(maxdigits) + "X}"
 
     for i in range(count):
-        val = i * nbytes
+        val = start + i * nbytes
         print(fstring.format(val))
 
 main()

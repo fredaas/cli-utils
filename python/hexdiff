@@ -1,32 +1,47 @@
 #!/usr/bin/env python3
-"""
-Usage:
-    hexdiff <start> <end> [-b <nbytes>]
 
-Compute the number of addresses between two hex addresses.
+import sys
+import re
 
-Options:
-    <start>
-        Start hex address.
+# Expected format:
+#
+# 0x0 <string 1>
+# 0x4 <string 2>
+# 0x8 <string 4>
 
-    <end>
-        End hex address.
+def get_vals(line):
+    capt = re.match(r"(0x.*) (.*)", line)
+    assert capt != None, \
+        'Failed to parse line'
+    return int(capt.group(1), 16), capt.group(2)
 
-    -b <nbytes>
-        Bytes per address. Defaults to 4.
-"""
-from docopt import docopt
+def main():
+    bytes_per_addr = 4
 
-argv = docopt(__doc__, help=True)
+    index = 0
 
-nbytes = 4
+    buff = sys.stdin.read().splitlines()
 
-if argv['-b']:
-    nbytes = int(argv['-b'])
+    for i in range(len(buff) - 1):
+        line0 = buff[i]
+        line1 = buff[i + 1]
 
-addr_start = int(argv['<start>'], 16)
-addr_end = int(argv['<end>'], 16)
+        addr0, string0 = get_vals(line0)
+        addr1, string1 = get_vals(line1)
 
-diff = ((addr_end - addr_start) - nbytes) / nbytes
+        assert ((addr1 - addr0) % bytes_per_addr) == 0, \
+            f'Address difference not multiple of {bytes_per_addr}'
 
-print("{}".format(int(diff)))
+        diff = int(((addr1 - addr0) - bytes_per_addr) / bytes_per_addr)
+
+        if diff != 0:
+            print('u32 RESERVED{}[{}];'.format(index, diff))
+            index += 1
+
+        if i == 0:
+            print('u32 {};'.format(string0))
+
+        print('u32 {};'.format(string1))
+
+if __name__ == '__main__':
+    main()
