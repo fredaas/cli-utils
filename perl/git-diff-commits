@@ -31,24 +31,6 @@ my $basebranch = $ARGV[0];
 
 my $branch = $ARGV[1];
 
-if ($basebranch ne "HEAD")
-{
-    if (!grep(/^$basebranch$/, @branches))
-    {
-        print("[ERROR] Invalid base branch\n");
-        exit 1;
-    }
-}
-
-if ($branch ne "HEAD")
-{
-    if (!grep(/^$branch$/, @branches))
-    {
-        print("[ERROR] Invalid target branch\n");
-        exit 1;
-    }
-}
-
 my @diff_behind = split(/\n/,
     `git rev-list --no-merges --left-only --oneline $basebranch...$branch`);
 my $count_behind = scalar @diff_behind;
