@@ -2,7 +2,42 @@
 
 set -e
 
-TARGET=${1:-"origin"}
+SOURCE="origin"
+COMMAND=
+
+print_usage()
+{
+    cat << EOF
+Usage:
+    git-pull [-s <origin>] [-r]
+
+Options:
+    -s <origin>
+        Pull from this source. Defaults to 'origin'.
+
+    -r
+        Do a rebase if branches have diverged.
+EOF
+}
+
+while [[ "$#" -gt  0 ]]; do
+    case "$1" in
+    "-h")
+        print_usage && exit 0
+        ;;
+    "-s")
+        SOURCE="$2"
+        shift; shift;
+        ;;
+    "-r")
+        COMMAND="--rebase"
+        shift
+        ;;
+    *)
+        print_usage && exit 1
+    esac
+done
+
 CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 
-git pull "$TARGET" "$CURRENT_BRANCH"
+git pull $COMMAND $SOURCE $CURRENT_BRANCH
