@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""
+Usage:
+    rnip [<serial>]
+
+Options:
+    <serial>
+        Serial number to convert. Defaults to 2000.
+"""
+from docopt import docopt
+
+import re
+
+class Regex:
+    capt = None
+
+def ismatch(string, pattern):
+    pattern = r'^{}$'.format(pattern)
+    Regex.capt = re.match(pattern, string, flags=re.IGNORECASE)
+    return Regex.capt is not None
+
+def main():
+    argv = docopt(__doc__, help=True)
+
+    arg = argv['<serial>'] if argv['<serial>'] else '20000'
+
+    if ismatch(arg, r'\d+'):
+        val = int(Regex.capt.group(0))
+        print('10.19.{}.{}'.format(int(val / 256), val % 256))
+
+if __name__ == '__main__':
+    main()
