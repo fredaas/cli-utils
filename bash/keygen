@@ -11,7 +11,7 @@ CN=
 SAN="subjectAltName=DNS:localhost,IP:127.0.0.1"
 
 # Constants
-SUBJ="/C=NO/ST=Norway/L=Trondheim/O=FooBar/OU=R&D"
+SUBJ="/C=NO/ST=Norway/L=Trondheim/O=RadionorCommunications/OU=R&D"
 
 ssl_gen_rsa()
 {
@@ -20,7 +20,7 @@ ssl_gen_rsa()
 
 ssl_gen_rootca()
 {
-    openssl req -new -x509 -days 365 -key $OUTNAME.key -out $OUTNAME.crt \
+    openssl req -new -x509 -days $DAYS -key $OUTNAME.key -out $OUTNAME.crt \
       -subj ${SUBJ}
 }
 
@@ -31,7 +31,7 @@ ssl_gen_csr()
 
 ssl_sign_csr()
 {
-    openssl x509 -req -days 365 -in $OUTNAME.csr -CA $CA -CAkey $CAKEY -out $OUTNAME.crt \
+    openssl x509 -req -days $DAYS -in $OUTNAME.csr -CA $CA -CAkey $CAKEY -out $OUTNAME.crt \
         -extfile <(printf "%s" $SAN)
 }
 
@@ -130,11 +130,14 @@ arg_parse()
 
     COMMAND=${ARGV[0]}
 
-    [[ -z $CN ]] && CN="FooBar" && echo "Warning: CN not set, using default CN: ${CN}"
-
-    SUBJ="${SUBJ}/CN=${CN}"
 
     [[ ! "$COMMAND" =~ ^(root|cert|show)$ ]] && echo "Error: Invalid command: '$COMMAND'" && arg_print_usage && exit 1
+
+    [[ "$COMMAND" == "show" ]] && return
+
+    [[ -z "$CN" ]] && echo "Error: CN not set" && arg_print_usage && exit 1
+
+    SUBJ="${SUBJ}/CN=${CN}"
 
     if [[ "$COMMAND" == "cert" ]]; then
         [[ -z "$DAYS" || -z "$OUTNAME" || -z "$CA" || -z "$CAKEY" ]] && echo "Error: Missing argument(s)" && arg_print_usage && exit 1
