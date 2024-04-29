@@ -37,7 +37,7 @@ ssl_sign_csr()
 
 ssl_show()
 {
-    openssl x509 -noout -text -in "$1"
+    openssl x509 -noout -text -in "${@}"
 }
 
 arg_print_usage()
@@ -151,7 +151,9 @@ arg_parse()
 arg_parse "$@"
 
 if [[ "$COMMAND" == "show" ]]; then
-    ssl_show "${ARGV[1]}"
+    for item in "${@:2}"; do
+        ssl_show $item
+    done
 fi
 
 if [[ "$COMMAND" == "root" ]]; then
