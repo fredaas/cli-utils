@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+set -e
+
+print_usage()
+{
+    cat << EOF
+Usage:
+    git-fetch <command> [<options>]
+
+Options:
+    <command>
+        tag <dir> <tag> <url>
+            Do a shallow clone of the specified tag.
+
+        commit <dir> <hash> <url>
+            Do a full clone and checkout the specified commit hash. The target
+            directory can be nested.
+
+        tar <dir> <url>
+            Fetch a tar file and extract it into the specified directory. The
+            target directory can be nested.
+EOF
+}
+
+fetch_tar() {
+    [[ -z "$1" || -z "$2" ]] && print_usage && exit 1
+    DIR="$1" URL="$2"
+    FILE=$(basename "$URL")
+    wget "$URL"
+    mkdir -p "$DIR" && tar -xvf "$FILE" -C "$DIR" --strip-components 1
+    exit 0
+}
+
+fetch_tag() {
+    [[ -z "$1" || -z "$2" || -z "$3"  ]] && print_usage && exit 1
+    DIR="$1" TAG="$2" URL="$3"
+    mkdir -p "$DIR" && git clone --depth 1 --branch "$TAG" "$URL" "$DIR"
+    exit 0
+}
+
+fetch_commit() {
+    [[ -z "$1" || -z "$2" || -z "$3"  ]] && print_usage && exit 1
+    DIR="$1" HASH="$2" URL="$3"
+    mkdir -p "$DIR" && git clone "$URL" "$DIR" && cd "$DIR" && git checkout "$HASH"
+    exit 0
+}
+
+[[ "$#" -eq  0 ]] && print_usage && exit 1
+
+while [[ "$#" -gt  0 ]]; do
+    case "$1" in
+    "tag")
+        shift
+        fetch_tag "$1" "$2" "$3"
+        shift; shift; shift
+        ;;
+    "commit")
+        shift;
+        fetch_commit "$1" "$2" "$3"
+        shift; shift; shift;
+        ;;
+    "tar")
+        shift;
+        fetch_tar "$1" "$2"
+        shift; shift;
+        ;;
+    *)
+        print_usage && exit 1
+        ;;
+    esac
+done
