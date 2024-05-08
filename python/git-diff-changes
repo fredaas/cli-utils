@@ -35,62 +35,66 @@ import re
 
 from docopt import docopt
 
-OPTION_COMMITS           = 0b00001
-OPTION_UNTRACKED         = 0b00010
-OPTION_STAGED            = 0b00100
-OPTION_UNSTAGED          = 0b01000
-OPTION_COUNT             = 0b10000
+OPTION_COMMITS   = 0b00001
+OPTION_UNTRACKED = 0b00010
+OPTION_STAGED    = 0b00100
+OPTION_UNSTAGED  = 0b01000
+OPTION_COUNT     = 0b10000
 
 TARGET_BRANCH = 'master'
 
+
 class Flag:
-    EXTENSIONS = None # Only list these extensions
-    PATHS  = ''       # Only list these paths
-    COUNT = 0         # Only check these commits
+    EXTENSIONS = None  # Only list these extensions
+    PATHS      = ''    # Only list these paths
+    COUNT      = 0     # Only check these commits
+
 
 def git_merge_base(target, source):
     ret = proc.run(f'git merge-base {target} {source}'.split(),
-            check=True, text=True, stdout=proc.PIPE)
+                   check=True, text=True, stdout=proc.PIPE)
     return ret.stdout.strip()
+
 
 def git_diff(options):
     files = []
 
     if (options & OPTION_COUNT):
         ret = proc.run(f'git diff --name-only HEAD~{Flag.COUNT} {Flag.PATHS}'.split(),
-                check=True, text=True, stdout=proc.PIPE)
+                       check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
     if (options & OPTION_COMMITS):
         sha_from = git_merge_base(TARGET_BRANCH, 'HEAD')
         sha_to = git_merge_base('HEAD', 'HEAD')
         ret = proc.run(f'git diff --name-only {sha_from} {sha_to} {Flag.PATHS}'.split(),
-                check=True, text=True, stdout=proc.PIPE)
+                       check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
     if (options & OPTION_UNTRACKED):
         ret = proc.run('git ls-files --others --exclude-standard'.split(),
-                check=True, text=True, stdout=proc.PIPE)
+                       check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
     if (options & OPTION_STAGED):
         ret = proc.run(f'git diff --name-only --staged {Flag.PATHS}'.split(),
-                check=True, text=True, stdout=proc.PIPE)
+                       check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
     if (options & OPTION_UNSTAGED):
         ret = proc.run(f'git diff --name-only {Flag.PATHS}'.split(),
-                check=True, text=True, stdout=proc.PIPE)
+                       check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
     if not Flag.EXTENSIONS:
         return files
 
-    stripped_files = [ x for x in files if re.search(Flag.EXTENSIONS, x) ]
+    stripped_files = [x for x in files if re.search(Flag.EXTENSIONS, x)]
 
     stripped_files.sort(key=lambda x: re.search(Flag.EXTENSIONS, x).group(0))
 
     return stripped_files
+
 
 if __name__ == '__main__':
     argv = docopt(__doc__, help=True)
