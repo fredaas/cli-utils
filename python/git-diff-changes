@@ -57,7 +57,7 @@ def git_diff(options):
     files = []
 
     if (options & OPTION_COUNT):
-        ret = proc.run(f'git diff --name-only HEAD~{Flag.COUNT}'.split(),
+        ret = proc.run(f'git diff --name-only HEAD~{Flag.COUNT} {Flag.PATHS}'.split(),
                 check=True, text=True, stdout=proc.PIPE)
         files += ret.stdout.strip().split()
 
@@ -95,7 +95,7 @@ def git_diff(options):
 if __name__ == '__main__':
     argv = docopt(__doc__, help=True)
 
-    options = OPTION_COMMITS | OPTION_UNSTAGED | OPTION_STAGED | OPTION_UNTRACKED
+    options = OPTION_COMMITS | OPTION_UNSTAGED | OPTION_STAGED
 
     if argv['-p']:
         Flag.PATHS = '-- {}'.format(' '.join(argv['-p'].split(',')))
