@@ -29,6 +29,11 @@ ssl_gen_csr()
     openssl req -new -key $OUTNAME.key -out $OUTNAME.csr -subj ${SUBJ}
 }
 
+ssl_convert_pem2der()
+{
+    openssl x509 -outform der -inform pem -in $OUTNAME.crt -out $OUTNAME.der
+}
+
 ssl_sign_csr()
 {
     openssl x509 -req -days $DAYS -in $OUTNAME.csr -CA $CA -CAkey $CAKEY -out $OUTNAME.crt \
@@ -44,8 +49,8 @@ arg_print_usage()
 {
     cat << EOF
 Usage:
-    keygen root --out <name> [--days <days>]
-    keygen cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>] [--cn <string>]
+    keygen root --out <name> --cn <name> [--days <days>]
+    keygen cert --out <name> --ca <path> --cakey <path> --cn <name> [--days <days>] [--san <string>]
     keygen show <path>
 EOF
 }
@@ -54,8 +59,8 @@ arg_print_full_usage()
 {
     cat << EOF
 Usage:
-    keygen root --out <name> [--days <days>]
-    keygen cert --out <name> --ca <path> --cakey <path> [--days <days>] [--san <string>]
+    keygen root --out <name> --cn <name> [--days <days>]
+    keygen cert --out <name> --ca <path> --cakey <path> --cn <name> [--days <days>] [--san <string>]
     keygen show <path>
 
 Options:
@@ -130,8 +135,9 @@ arg_parse()
 
     COMMAND=${ARGV[0]}
 
+    [[  "${#ARGV[@]}" -eq 0 ]] && arg_print_usage && exit 1
 
-    [[ ! "$COMMAND" =~ ^(root|cert|show)$ ]] && echo "Error: Invalid command: '$COMMAND'" && arg_print_usage && exit 1
+    [[ ! "$COMMAND" =~ ^(root|cert|show)$ ]] && echo "Error: Invalid command: '$COMMAND'" && exit 1
 
     [[ "$COMMAND" == "show" ]] && return
 
@@ -157,9 +163,9 @@ if [[ "$COMMAND" == "show" ]]; then
 fi
 
 if [[ "$COMMAND" == "root" ]]; then
-    ssl_gen_rsa && ssl_gen_rootca
+    ssl_gen_rsa && ssl_gen_rootca && ssl_convert_pem2der
 fi
 
 if [[ "$COMMAND" == "cert" ]]; then
-    ssl_gen_rsa && ssl_gen_csr && ssl_sign_csr
+    ssl_gen_rsa && ssl_gen_csr && ssl_sign_csr && ssl_convert_pem2der
 fi
