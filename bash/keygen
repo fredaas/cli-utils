@@ -13,6 +13,11 @@ SAN="subjectAltName=DNS:localhost,IP:127.0.0.1"
 # Constants
 SUBJ="/C=NO/ST=Norway/L=Trondheim/O=RadionorCommunications/OU=R&D"
 
+ssl_gen_ecc()
+{
+    openssl ecparam -name secp521r1 -genkey -noout -out $OUTNAME.key
+}
+
 ssl_gen_rsa()
 {
     openssl genrsa -out $OUTNAME.key 2048
@@ -21,7 +26,7 @@ ssl_gen_rsa()
 ssl_gen_rootca()
 {
     openssl req -new -x509 -days $DAYS -key $OUTNAME.key -out $OUTNAME.crt \
-      -subj ${SUBJ}
+      -subj ${SUBJ} -sha512
 }
 
 ssl_gen_csr()
@@ -163,9 +168,9 @@ if [[ "$COMMAND" == "show" ]]; then
 fi
 
 if [[ "$COMMAND" == "root" ]]; then
-    ssl_gen_rsa && ssl_gen_rootca && ssl_convert_pem2der
+    ssl_gen_ecc && ssl_gen_rootca && ssl_convert_pem2der
 fi
 
 if [[ "$COMMAND" == "cert" ]]; then
-    ssl_gen_rsa && ssl_gen_csr && ssl_sign_csr && ssl_convert_pem2der
+    ssl_gen_ecc && ssl_gen_csr && ssl_sign_csr && ssl_convert_pem2der
 fi
