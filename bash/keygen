@@ -42,7 +42,7 @@ ssl_convert_pem2der()
 ssl_sign_csr()
 {
     openssl x509 -req -days $DAYS -in $OUTNAME.csr -CA $CA -CAkey $CAKEY -out $OUTNAME.crt \
-        -extfile <(printf "%s" $SAN)
+        -extfile <(printf "%s" $SAN) -sha512
 }
 
 ssl_show()
