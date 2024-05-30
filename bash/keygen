@@ -36,7 +36,8 @@ ssl_gen_csr()
 
 ssl_convert_pem2der()
 {
-    openssl x509 -outform der -inform pem -in $OUTNAME.crt -out $OUTNAME.der
+    openssl x509 -inform PEM -outform DER -in $OUTNAME.crt -out $OUTNAME.crt.der
+    openssl ec -inform PEM -outform DER -in $OUTNAME.key -out $OUTNAME.key.der
 }
 
 ssl_sign_csr()
