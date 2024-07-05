@@ -22,11 +22,16 @@ def parse_value(value):
     return int(value, 16)
 
 
-argv = docopt(__doc__, help=True)
+def main():
+    argv = docopt(__doc__, help=True)
 
-val = parse_value(argv['<value>'])  # int(argv['<value>'])
-val = max(1, val)
-exp = ceil(log(val, 2))
-val = 2**exp
+    val = parse_value(argv['<value>'])
+    val = max(1, val)
+    exp = ceil(log(val, 2))
+    val = 2**exp
 
-print(hex(val), val)
+    print(hex(val), val)
+
+
+if __name__ == '__main__':
+    main()
