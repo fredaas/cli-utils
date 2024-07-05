@@ -1,36 +1,71 @@
 #!/usr/bin/env python3
+"""
+Usage:
+    hexdiff <file_path> [-x <x>] [-y <y>]
 
+Create a memory map from a sequence of hex addresses.
+
+Options:
+    <file_path>
+        Target file.
+
+    -x <x>
+        Address column. [default: 0]
+
+    -y <y>
+        Name column. [default: 1]
+"""
 import sys
 import re
+import os
 
-# Expected format:
-#
-# 0x0 <string 1>
-# 0x4 <string 2>
-# 0x8 <string 4>
+from docopt import docopt
+
+
+class Option:
+    X = 0
+    Y = 1
+
 
 def get_vals(line):
-    capt = re.match(r"(0x.*) (.*)", line)
-    assert capt != None, \
-        'Failed to parse line'
-    return int(capt.group(1), 16), capt.group(2)
+    line = line.split(' ')
 
-def main():
+    if len(line) < 2:
+        print('Error: Invalid line format')
+        exit(1)
+
+    addr, name = line[Option.X], line[Option.Y]
+
+    if not addr.startswith('0x'):
+        print('Error: Invalid address format')
+        exit(1)
+
+    return int(addr, 16), name
+
+
+def read_file(path):
+    if not os.path.isfile(path):
+        print('Error: Invalid path')
+        exit(1)
+
+    with open(path, 'r') as fh:
+        return fh.read().strip().splitlines()
+
+
+def create_diff_map(buff):
     bytes_per_addr = 4
-
-    index = 0
-
-    buff = sys.stdin.read().splitlines()
+    index = 0  # Index for RESERVED register
 
     for i in range(len(buff) - 1):
         line0 = buff[i]
         line1 = buff[i + 1]
 
-        addr0, string0 = get_vals(line0)
-        addr1, string1 = get_vals(line1)
+        addr0, name0 = get_vals(line0)
+        addr1, name1 = get_vals(line1)
 
-        assert ((addr1 - addr0) % bytes_per_addr) == 0, \
-            f'Address difference not multiple of {bytes_per_addr}'
+        if ((addr1 - addr0) % bytes_per_addr) != 0:
+            print(f'Error: Address not multiple of {bytes_per_addr}')
+            exit(1)
 
         diff = int(((addr1 - addr0) - bytes_per_addr) / bytes_per_addr)
 
@@ -39,9 +74,21 @@ def main():
             index += 1
 
         if i == 0:
-            print('u32 {};'.format(string0))
+            print('u32 {};'.format(name0))
 
-        print('u32 {};'.format(string1))
+        print('u32 {};'.format(name1))
+
+
+def main():
+    argv = docopt(__doc__, help=True)
+
+    Option.X = int(argv['-x'])
+    Option.Y = int(argv['-y'])
+
+    buff = read_file(argv['<file_path>'])
+
+    create_diff_map(buff)
+
 
 if __name__ == '__main__':
     main()
