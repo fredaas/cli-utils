@@ -28,7 +28,7 @@ class Option:
 
 
 def get_vals(line):
-    line = line.split(' ')
+    line = [x for x in line.split(' ') if len(x.strip()) != 0]
 
     if len(line) < 2:
         print('Error: Invalid line format')
