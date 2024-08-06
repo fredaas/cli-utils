@@ -69,12 +69,12 @@ def create_diff_map(buff):
 
         diff = int(((addr1 - addr0) - bytes_per_addr) / bytes_per_addr)
 
+        if i == 0:
+            print('u32 {};'.format(name0))
+
         if diff != 0:
             print('u32 RESERVED{}[{}];'.format(index, diff))
             index += 1
-
-        if i == 0:
-            print('u32 {};'.format(name0))
 
         print('u32 {};'.format(name1))
 
