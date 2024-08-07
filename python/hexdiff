@@ -22,6 +22,9 @@ import os
 from docopt import docopt
 
 
+LINE_FMT = '{:64} /* 0x{:08X} */'
+
+
 class Option:
     X = 0
     Y = 1
@@ -54,7 +57,8 @@ def read_file(path):
 
 def create_diff_map(buff):
     bytes_per_addr = 4
-    index = 0  # Index for RESERVED register
+    index = 0    # Reserved register index
+    offset = 0   # Register address offset
 
     for i in range(len(buff) - 1):
         line0 = buff[i]
@@ -70,13 +74,17 @@ def create_diff_map(buff):
         diff = int(((addr1 - addr0) - bytes_per_addr) / bytes_per_addr)
 
         if i == 0:
-            print('u32 {};'.format(name0))
+            print(LINE_FMT.format('u32 {}'.format(name0), offset))
+
+        offset += bytes_per_addr
 
         if diff != 0:
-            print('u32 RESERVED{}[{}];'.format(index, diff))
+            print(LINE_FMT.format('u32 RESERVED{}[{}]'.format(index, diff), offset))
             index += 1
 
-        print('u32 {};'.format(name1))
+        offset += diff * bytes_per_addr
+
+        print(LINE_FMT.format('u32 {}'.format(name1), offset))
 
 
 def main():
