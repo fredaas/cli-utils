@@ -74,17 +74,17 @@ def create_diff_map(buff):
         diff = int(((addr1 - addr0) - bytes_per_addr) / bytes_per_addr)
 
         if i == 0:
-            print(LINE_FMT.format('u32 {}'.format(name0), offset))
+            print(LINE_FMT.format('u32 {};'.format(name0), offset))
 
         offset += bytes_per_addr
 
         if diff != 0:
-            print(LINE_FMT.format('u32 RESERVED{}[{}]'.format(index, diff), offset))
+            print(LINE_FMT.format('u32 RESERVED{}[{}];'.format(index, diff), offset))
             index += 1
 
         offset += diff * bytes_per_addr
 
-        print(LINE_FMT.format('u32 {}'.format(name1), offset))
+        print(LINE_FMT.format('u32 {};'.format(name1), offset))
 
 
 def main():
