@@ -24,7 +24,7 @@ def main():
 
     start = 0
     if argv["-s"]:
-        start = int(argv["-s"])
+        start = int(argv["-s"], 16)
     start = max(0, start)
 
     count = 8
