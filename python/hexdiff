@@ -30,6 +30,12 @@ class Option:
     Y = 1
 
 
+def get_count(string):
+    capt = re.match(r'\[(\d+)\]', string)
+    if capt:
+        return capt.group(1)
+    return 0
+
 def get_vals(line):
     line = [x for x in line.split(' ') if len(x.strip()) != 0]
 
@@ -39,11 +45,17 @@ def get_vals(line):
 
     addr, name = line[Option.X], line[Option.Y]
 
-    if not addr.startswith('0x'):
+    capt = re.match(r'(0x[a-fA-F0-9]+)(.*)', addr)
+
+    if not capt:
         print('Error: Invalid address format')
         exit(1)
 
-    return int(addr, 16), name
+    addr = int(capt.group(1), 16)
+
+    count = get_count(capt.group(2))
+
+    return addr, count, name
 
 
 def read_file(path):
@@ -64,8 +76,8 @@ def create_diff_map(buff):
         line0 = buff[i]
         line1 = buff[i + 1]
 
-        addr0, name0 = get_vals(line0)
-        addr1, name1 = get_vals(line1)
+        addr0, count0, name0 = get_vals(line0)
+        addr1, count1, name1 = get_vals(line1)
 
         if ((addr1 - addr0) % bytes_per_addr) != 0:
             print(f'Error: Address not multiple of {bytes_per_addr}')
