@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+COMMENT="fredaas86@gmail.com"
+OUTFILE=
+ARGV=()
+
+arg_print_usage()
+{
+    cat << EOF
+Usage:
+    sshkeygen <file_name> [-c <comment>]
+EOF
+}
+
+arg_parse()
+{
+    while [[ "$#" -gt  0 ]]; do
+        case "$1" in
+        "-h" | "--help")
+            arg_print_usage && exit 0
+            ;;
+        "-c")
+            COMMENT="$2"
+            shift; shift;
+            ;;
+        *)
+            ARGV+=("$1")
+            shift;
+            ;;
+        esac
+    done
+
+    [[  "${#ARGV[@]}" -eq 0 ]] && arg_print_usage && exit 1
+
+    OUTFILE=${ARGV[0]}
+
+    echo "Using $COMMENT as key comment. Enter 'yes' to confirm or any other key to abort."
+
+    read -p "> " choice
+
+    [[ "$choice" != "yes" ]] && echo "User aborted, exiting" && exit 1
+}
+
+arg_parse "$@"
+
+ssh-keygen -f $OUTFILE -t rsa -C $COMMENT
