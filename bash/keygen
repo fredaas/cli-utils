@@ -169,9 +169,9 @@ if [[ "$COMMAND" == "show" ]]; then
 fi
 
 if [[ "$COMMAND" == "root" ]]; then
-    ssl_gen_ecc && ssl_gen_rootca && ssl_convert_pem2der
+    ssl_gen_rsa && ssl_gen_rootca && ssl_convert_pem2der
 fi
 
 if [[ "$COMMAND" == "cert" ]]; then
-    ssl_gen_ecc && ssl_gen_csr && ssl_sign_csr && ssl_convert_pem2der
+    ssl_gen_rsa && ssl_gen_csr && ssl_sign_csr && ssl_convert_pem2der
 fi
