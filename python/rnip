@@ -29,6 +29,7 @@ def main():
         oct3, oct4 = int(val / 256), val % 256
         print('10.19.{}.{}'.format(oct3, oct4))
         print('192.168.{}.{}'.format(oct3, oct4))
+        print('00:00:00:{:02X}:{:02X}'.format(oct3, oct4))
 
 if __name__ == '__main__':
     main()
