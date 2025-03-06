@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+"""
+Usage:
+    symsize <main.elf>
+
+Compute and sort all symbols in an ELF file
+
+Options:
+    <main.elf>
+        ELF file to analyze.
+"""
+
+import os
+
+import subprocess as proc
+
+from docopt import docopt
+
+
+def run_command(cmd, check=True):
+    ret = proc.run(cmd, check=check, text=True, stdout=proc.PIPE)
+    return ret.stdout.strip().splitlines()
+
+
+def print_symsize(filepath):
+    cmd = ["riscv32-unknown-elf-readelf", "-sX", filepath]
+    ret = run_command(cmd)
+    ret = ret[2:] # Ignore table headers
+
+    symbols = []
+
+    for item in ret:
+        data = item.split()
+        size, name = int(data[2]), data[-1]
+        if size > 0:
+            symbols.append((size, name))
+
+    symbols = sorted(symbols, key=lambda x: x[0])
+
+    for item in symbols:
+        size, name = item
+        print(size, name)
+
+
+if __name__ == "__main__":
+    argv = docopt(__doc__, help=True)
+    filepath = os.path.abspath(argv["<main.elf>"])
+    print_symsize(filepath)
