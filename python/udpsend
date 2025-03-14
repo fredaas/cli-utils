@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """
 Usage:
-    udpsend <addr> -m <message> [-t <secs>]
+    udpsend -c <host> -p <port> -m <message> [-t <secs>]
 
 Options:
-    <addr>
-        Socket to send to in the form <ipv4>:<port>.
+    -c <host>
+        Target host.
+
+    -p <port>
+        Target host port.
 
     -m <message>
         Message to send.
@@ -13,6 +16,7 @@ Options:
     -t <secs>
         Timeout after this many seconds (integer). [default: 3]
 """
+
 import socket
 import time
 
@@ -23,7 +27,7 @@ is_running = True
 UDP_RECV_MAX_SIZE = 1024
 
 
-class UDPSocket():
+class UDPSocket:
     def __init__(self, addr, port, timeout=0.5):
         self.addr = (addr, port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -40,7 +44,7 @@ class UDPSocket():
         except TimeoutError:
             pass
         except Exception as e:
-            print('recvfrom: {}'.format(e))
+            print("recvfrom: {}".format(e))
         return ret
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -58,13 +62,41 @@ def sigint_handler(sig, frame):
     is_running = False
 
 
+def byte2ascii(data):
+    if data < 33 or data > 126:
+        return "."
+    return chr(data)
+
+
+def calc_padding(bytes_remaining, bytes_per_column):
+    padding = bytes_per_column - min(bytes_remaining, bytes_per_column)
+    # Add 2 hex chars per byte + space between each byte in padding
+    return padding * 2 + padding
+
+
+def print_decoded_data(data, bytes_per_column=16):
+    ascii_index_start = 0
+    data_length = len(data)
+
+    for i in range(data_length):
+        print("{:02X}".format(data[i]), end=" ", flush=True)
+        # Print ASCII decoding + newline on column limit or on last byte
+        if (i + 1) % bytes_per_column == 0 or i == data_length - 1:
+            padding = calc_padding(data_length - ascii_index_start, bytes_per_column)
+            print(" " * padding + "|", end="")
+            print(" ", end="")
+            for j in range(ascii_index_start, i + 1):
+                print(byte2ascii(data[j]), end="", flush=True)
+            print()
+            ascii_index_start = i + 1
+
+
 def main():
     argv = docopt(__doc__, help=True)
 
-    addr, port = argv['<addr>'].split(':')
-    port = int(port)
-    message = bytearray(argv['-m'], 'utf-8')
-    timeout = int(argv['-t'])
+    addr, port = argv["-c"], int(argv["-p"])
+    message = bytearray(argv["-m"], "utf-8")
+    timeout = int(argv["-t"])
 
     udp = UDPSocket(addr, port)
     udp.send(message)
@@ -75,18 +107,18 @@ def main():
         resp = udp.recv()
 
         if time.perf_counter() - time_start >= timeout:
-            print('Host timed out')
             break
 
         if not resp:
             continue
 
         data, addr = resp
-        print(data.decode('utf-8'))
-        break
+
+        if data:
+            print_decoded_data(data)
 
     udp.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
