@@ -108,6 +108,8 @@ def main():
 
     signal.signal(signal.SIGINT, sigint_handler)
 
+    count = 0
+
     while is_running:
         resp = udp.recv()
 
@@ -119,8 +121,12 @@ def main():
 
         data, addr = resp
 
+        count += 1
+
         if data:
+            print("No: {}".format(count))
             print_decoded_data(data)
+            print()
 
     udp.close()
 
