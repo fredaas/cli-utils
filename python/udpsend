@@ -19,6 +19,7 @@ Options:
 
 import socket
 import time
+import signal
 
 from docopt import docopt
 
@@ -103,6 +104,10 @@ def main():
 
     time_start = time.perf_counter()
 
+    print("Will listen for {} seconds. CTRL+C to exit.\n".format(timeout))
+
+    signal.signal(signal.SIGINT, sigint_handler)
+
     while is_running:
         resp = udp.recv()
 
@@ -118,6 +123,9 @@ def main():
             print_decoded_data(data)
 
     udp.close()
+
+    # Print a space after CTRL+C (visual preference only)
+    print()
 
 
 if __name__ == "__main__":
