@@ -104,7 +104,7 @@ def main():
 
     time_start = time.perf_counter()
 
-    print("Will listen for {} seconds. CTRL+C to exit.\n".format(timeout))
+    print("Listening on {}. CTRL+C to exit.\n".format(port))
 
     signal.signal(signal.SIGINT, sigint_handler)
 
@@ -113,7 +113,8 @@ def main():
     while is_running:
         resp = udp.recv()
 
-        if time.perf_counter() - time_start >= timeout:
+        # Run forever if timeout is zero
+        if timeout != 0 and time.perf_counter() - time_start >= timeout:
             break
 
         if not resp:
