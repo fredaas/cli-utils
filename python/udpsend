@@ -27,6 +27,9 @@ is_running = True
 
 UDP_RECV_MAX_SIZE = 1024
 
+FRAMENO_FORMAT = "{:6d}: "
+FRAMENO_LENGTH = len(FRAMENO_FORMAT.format(0))
+
 
 class UDPSocket:
     def __init__(self, addr, port, timeout=0.5):
@@ -88,8 +91,15 @@ def print_decoded_data(data, bytes_per_column=16):
             print(" ", end="")
             for j in range(ascii_index_start, i + 1):
                 print(byte2ascii(data[j]), end="", flush=True)
+
             print()
+            # Padd subsequent rows to align with frame number
+            print(" " * FRAMENO_LENGTH, end="")
+
             ascii_index_start = i + 1
+
+    # Remove padding from last row
+    print("\x1b[0G", end="")
 
 
 def main():
@@ -108,7 +118,7 @@ def main():
 
     signal.signal(signal.SIGINT, sigint_handler)
 
-    count = 0
+    frameno = 0
 
     while is_running:
         resp = udp.recv()
@@ -122,12 +132,11 @@ def main():
 
         data, addr = resp
 
-        count += 1
+        frameno += 1
 
         if data:
-            print("No: {}".format(count))
+            print(FRAMENO_FORMAT.format(frameno), end="")
             print_decoded_data(data)
-            print()
 
     udp.close()
 
