@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+TAG_NAME=${1}
+
+print_usage()
+{
+cat << EOF
+Usage:
+    git-checkout-tag <tag_name>
+EOF
+}
+
+[[ -z "$TAG_NAME" ]] && print_usage && exit 1
+
+git checkout -b "$TAG_NAME" tags/"$TAG_NAME"
